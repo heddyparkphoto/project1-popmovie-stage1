@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Awesome Movies</string>
+    <string name="title_activity_detail">Details</string>
+    <string name="title_sort_by">Sort Option</string>
+    <string name="pref_sort_by_key">sort_option</string>
+    <string name="pref_default_sort_by">vote_average.desc</string>
+    <string name="title_action_settings">Settings</string>
+</resources>
