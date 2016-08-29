@@ -2,6 +2,7 @@ package com.learn.heddy.awesomemovies;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * Created by hyeryungpark on 8/27/16.
@@ -55,11 +56,14 @@ public class Movie implements Parcelable {
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {
         @Override
         public Movie createFromParcel(Parcel in) {
+
+            Log.v("Movie", "Creating ...");
             return new Movie(in);
         }
 
         @Override
         public Movie[] newArray(int size) {
+            Log.v("Movie", "in newArrar ...");
             return new Movie[size];
         }
     };
@@ -71,6 +75,13 @@ public class Movie implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        Log.v("Movie", "WRITING Zzzzzzz");
+
         dest.writeString(id);
+        dest.writeString(posterpath);
+        dest.writeString(title);
+        dest.writeString(overview);
+        dest.writeString(rating);
+        dest.writeString(releasedate);
     }
 }

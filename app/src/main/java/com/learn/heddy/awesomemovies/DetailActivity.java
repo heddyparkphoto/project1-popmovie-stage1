@@ -30,13 +30,13 @@ public class DetailActivity extends ActionBarActivity {
         }
     }
 
-
-
-
-    /*
+   /*
      *  Fragment class that shows the Movie details selected in the main screen
      */
     public static class DetailFragment extends Fragment {
+
+        public static final String INTENT_PARCEL = "INTENT_PARCEL";
+        public static final String MOVIE_PARCEL = "MOVIE_PARCEL";
 
         String movieid;
         String posterpathTxt;
@@ -54,19 +54,39 @@ public class DetailActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+            // finish Views
+            ImageView poster = (ImageView)rootView.findViewById(R.id.posterImage);
+            TextView titleText = (TextView)rootView.findViewById(R.id.titleText);
+            TextView synopsisPlotText = (TextView) rootView.findViewById(R.id.synopsisPlotText);
+            TextView ratingText = (TextView) rootView.findViewById(R.id.ratingText);
+            TextView releaseDateText = (TextView) rootView.findViewById(R.id.releaseDateText);
 
             Intent intent = getActivity().getIntent();
 
             if (null!=intent && null!=intent.getExtras()){
                 if (null!=intent.getExtras().get("MOVIE_POSTERPATH")){
                     String posterpath = intent.getExtras().get("MOVIE_POSTERPATH").toString();
-                    ImageView poster = (ImageView)rootView.findViewById(R.id.posterImage);
+                    poster = (ImageView)rootView.findViewById(R.id.posterImage);
                     Picasso.with(getActivity()).load(posterpath).into(poster);
                 }
                 if (null!=intent.getExtras().get("MOVIE_TITLE")){
                     String title = intent.getExtras().get("MOVIE_TITLE").toString();
-                    TextView titleText = (TextView)rootView.findViewById(R.id.titleText);
+                    titleText = (TextView)rootView.findViewById(R.id.titleText);
                     titleText.setText(title);
+                }
+
+                // Test Parceable Movie
+                if (null!=intent.getBundleExtra(INTENT_PARCEL)){
+                    Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
+                    if (bundle.getParcelable(MOVIE_PARCEL)!= null) {
+                        Movie movieForDetail = bundle.getParcelable(MOVIE_PARCEL);
+                        String posterpath = movieForDetail.posterpath;
+                        Picasso.with(getActivity()).load(posterpath).into(poster);
+                        titleText.setText(movieForDetail.title);
+                        synopsisPlotText.setText(movieForDetail.overview);
+                        releaseDateText.setText(movieForDetail.releasedate);
+                        ratingText.setText(movieForDetail.rating);
+                    }
                 }
             }
 

@@ -65,14 +65,14 @@ public class MoviesFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         Movie mm = mMoviePosterAdapter.getItem(position);
-                        String posterpath = mm.posterpath;
-                        String title = mm.title;
 
-                        //start DetailActivity
+                        //Set on Bundle the Parcelable Movie object
+                        //Use Explicit Intent for Part 1 project
                         Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        //test with two fields
-                        intent.putExtra("MOVIE_POSTERPATH", posterpath);
-                        intent.putExtra("MOVIE_TITLE", title);
+                        Bundle mParcel = new Bundle();
+                        mParcel.putParcelable(DetailActivity.DetailFragment.MOVIE_PARCEL, mm);
+
+                        intent.putExtra(DetailActivity.DetailFragment.INTENT_PARCEL, mParcel);
                         startActivity(intent);
                     }
                 }
@@ -84,12 +84,10 @@ public class MoviesFragment extends Fragment {
           -- Udacity note on using Picasso to load movie thumbs into ImageView instance
 
           "You can use Picasso to easily load album art thumbnails into your views using:
-
           Picasso.with(context).load("http://i.imgur.com/DvpvklR.png").into(imageView);
-
-
           Picasso will handle loading the images on a background thread,
           image decompression and caching the images."
+
         */
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
 
@@ -105,15 +103,13 @@ public class MoviesFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String moviesJsonStr = null;
 
-            //query holders
-            String[] firstResponsesArray = null; //will need further process in order to get posters
-
             try {
-                //Utilize Uri helper class
+                // Utilize Uri helper class - Answer about the difference between two BASE URLs
+                // on the host site "/movie/popular may return the same result, but /discover/movie? offers slew of filters.."
                 final String MOVIES_API_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
                 final String SORT_BY_PARAM = "sort_by";
                 final String MY_KEY_PARAM = "api_key";
-                final String MY_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;  //CAUTION!!!! DO NOT DISTRIBUTE IF GOING PUBLIC@@@@@@
+                final String MY_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;  //CAUTION!!!! DO NOT DISTRIBUTE THE KEY TO PUBLIC@@@@@@
 
                 Uri builtUri = Uri.parse(MOVIES_API_BASE_URL).buildUpon()
                         .appendQueryParameter(SORT_BY_PARAM, sortBy[0])
@@ -173,9 +169,6 @@ public class MoviesFragment extends Fragment {
                 }
             }
 
-            //debug for now
-            Log.v(LOG_TAG, moviesJsonStr);
-
             //do Movie data parsing
             try {
                 return getMovieDataFromJson(moviesJsonStr);
@@ -206,12 +199,11 @@ public class MoviesFragment extends Fragment {
             final String KEY_RATING_PART2 = "vote_count";
             final String KEY_RELEASE_DATE = "release_date";
 
-            final String SIZE_PARAM = "size";
-            final String ORIGINAL_VALUE = "original";
-            final String W185 = "w185";
+            final String W185 = "w185"; // Recommendation of the SIZE value for a phone
 
-            //build per instruction for absolute url  http://image.tmdb.org/t/p/?size=original/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
-            Uri uriToBuild = Uri.parse("http://image.tmdb.org/t/p/").buildUpon()
+            //build per instruction for absolute url  http://image.tmdb.org/t/p/size..value..here/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg
+            final String POSTER_BASE_URL = "http://image.tmdb.org/t/p/";
+            Uri uriToBuild = Uri.parse(POSTER_BASE_URL).buildUpon()
                     .appendEncodedPath(W185)
                     .build();
 
@@ -237,9 +229,6 @@ public class MoviesFragment extends Fragment {
                 movieArray[i].title = movie.getString(KEY_TITLE);
                 movieArray[i].rating = movie.getString(KEY_RATING_PART1) + " / " + (movie.getString(KEY_RATING_PART2));
                 movieArray[i].releasedate = movie.getString(KEY_RELEASE_DATE);
-
-                Log.d(LOG_TAG, postersource);
-                Log.d(LOG_TAG, movieArray[i].rating);
             }
 
             return movieArray;
@@ -255,11 +244,8 @@ public class MoviesFragment extends Fragment {
         prefSortOption = sharedPreferences.getString(
                 getString(R.string.pref_sort_by_key), getString(R.string.pref_default_sort_by));
 
-        Log.d(LOG_TAG, "Preferred Sort option " + prefSortOption);
-
         FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
-        // sort by must come from Settings preference... for now hard-code with default preference
-        // with these values: popular or top_rated
+        // sort by user Settings preference
         fetchMoviesTask.execute(prefSortOption);
     }
 }
