@@ -94,7 +94,7 @@ public class MoviesFragment extends Fragment {
         private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
 
         @Override
-        protected Movie[] doInBackground(String... sortBy) {
+        protected Movie[] doInBackground(String... optionBy) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -104,15 +104,14 @@ public class MoviesFragment extends Fragment {
             String moviesJsonStr = null;
 
             try {
-                // Utilize Uri helper class - Answer about the difference between two BASE URLs
-                // on the host site "/movie/popular may return the same result, but /discover/movie? offers slew of filters.."
-                final String MOVIES_API_BASE_URL = "http://api.themoviedb.org/3/discover/movie?";
-                final String SORT_BY_PARAM = "sort_by";
+                // Utilize Uri helper class and set new BASE URL - Refer to the answer about the difference between two URLs
+                // on the movie api site "/movie/popular may return the same result, but /discover/movie? offers slew of filters.."
+                final String MOVIES_API_BASE_URL = "http://api.themoviedb.org/3/movie";
                 final String MY_KEY_PARAM = "api_key";
                 final String MY_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;  //CAUTION!!!! DO NOT DISTRIBUTE THE KEY TO PUBLIC@@@@@@
 
                 Uri builtUri = Uri.parse(MOVIES_API_BASE_URL).buildUpon()
-                        .appendQueryParameter(SORT_BY_PARAM, sortBy[0])
+                        .appendPath(optionBy[0])
                         .appendQueryParameter(MY_KEY_PARAM, MY_KEY)
                         .build();
                 URL url;
