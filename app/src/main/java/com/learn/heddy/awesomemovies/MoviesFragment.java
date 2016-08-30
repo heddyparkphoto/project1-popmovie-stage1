@@ -1,5 +1,6 @@
 package com.learn.heddy.awesomemovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
@@ -108,8 +109,6 @@ public class MoviesFragment extends Fragment {
             // Will contain the raw JSON response as a string.
             String moviesJsonStr = null;
 
-
-
             try {
                 // Utilize Uri helper class and set new BASE URL - Refer to the answer about the difference between two URLs
                 // on the movie api site "/movie/popular may return the same result, but /discover/movie? offers slew of filters.."
@@ -161,8 +160,6 @@ public class MoviesFragment extends Fragment {
                 Log.e(LOG_TAG, "Other Exception ", e);
                 // If the code didn't successfully get the movie data, there's no point in attempting
                 // to parse it.
-                Toast.makeText(getActivity(), "Sorry, there is no network connectivity.",
-                        Toast.LENGTH_LONG).show();
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -266,7 +263,7 @@ public class MoviesFragment extends Fragment {
     private boolean isOnLine(){
 
         ConnectivityManager cm =
-                (ConnectivityManager) getActivity().getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
         return (netInfo != null && netInfo.isConnectedOrConnecting());
