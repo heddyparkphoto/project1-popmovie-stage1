@@ -2,6 +2,8 @@ package com.learn.heddy.awesomemovies;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -95,6 +98,8 @@ public class MoviesFragment extends Fragment {
 
         @Override
         protected Movie[] doInBackground(String... optionBy) {
+
+
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -102,6 +107,8 @@ public class MoviesFragment extends Fragment {
 
             // Will contain the raw JSON response as a string.
             String moviesJsonStr = null;
+
+
 
             try {
                 // Utilize Uri helper class and set new BASE URL - Refer to the answer about the difference between two URLs
@@ -154,6 +161,8 @@ public class MoviesFragment extends Fragment {
                 Log.e(LOG_TAG, "Other Exception ", e);
                 // If the code didn't successfully get the movie data, there's no point in attempting
                 // to parse it.
+                Toast.makeText(getActivity(), "Sorry, there is no network connectivity.",
+                        Toast.LENGTH_LONG).show();
                 return null;
             } finally {
                 if (urlConnection != null) {
@@ -243,8 +252,23 @@ public class MoviesFragment extends Fragment {
         prefSortOption = sharedPreferences.getString(
                 getString(R.string.pref_sort_by_key), getString(R.string.pref_default_sort_by));
 
-        FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
-        // sort by user Settings preference
-        fetchMoviesTask.execute(prefSortOption);
+        if (isOnLine()) {
+            FetchMoviesTask fetchMoviesTask = new FetchMoviesTask();
+            // sort by user Settings preference
+            fetchMoviesTask.execute(prefSortOption);
+        } else {
+            Toast.makeText(getActivity(),
+                    "No network connection.  Could not load a new set.  Please check your network connection.",
+                    Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean isOnLine(){
+
+        ConnectivityManager cm =
+                (ConnectivityManager) getActivity().getSystemService(android.content.Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+
+        return (netInfo != null && netInfo.isConnectedOrConnecting());
     }
 }

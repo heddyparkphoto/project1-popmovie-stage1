@@ -38,17 +38,9 @@ public class DetailActivity extends ActionBarActivity {
         public static final String INTENT_PARCEL = "INTENT_PARCEL";
         public static final String MOVIE_PARCEL = "MOVIE_PARCEL";
 
-        String movieid;
-        String posterpathTxt;
-        String titleTxt;
-        String plotTxt;
-        String ratingTxt;
-        String releasedateTxt;
-
         public DetailFragment(){
             setHasOptionsMenu(true);
         }
-
 
         @Nullable
         @Override
@@ -63,30 +55,16 @@ public class DetailActivity extends ActionBarActivity {
 
             Intent intent = getActivity().getIntent();
 
-            if (null!=intent && null!=intent.getExtras()){
-                if (null!=intent.getExtras().get("MOVIE_POSTERPATH")){
-                    String posterpath = intent.getExtras().get("MOVIE_POSTERPATH").toString();
-                    poster = (ImageView)rootView.findViewById(R.id.posterImage);
+            if (null!=intent && null!=intent.getBundleExtra(INTENT_PARCEL)) {
+                Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
+                if (bundle.getParcelable(MOVIE_PARCEL)!= null) {
+                    Movie movieForDetail = bundle.getParcelable(MOVIE_PARCEL);
+                    String posterpath = movieForDetail.posterpath;
                     Picasso.with(getActivity()).load(posterpath).into(poster);
-                }
-                if (null!=intent.getExtras().get("MOVIE_TITLE")){
-                    String title = intent.getExtras().get("MOVIE_TITLE").toString();
-                    titleText = (TextView)rootView.findViewById(R.id.titleText);
-                    titleText.setText(title);
-                }
-
-                // Test Parceable Movie
-                if (null!=intent.getBundleExtra(INTENT_PARCEL)){
-                    Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
-                    if (bundle.getParcelable(MOVIE_PARCEL)!= null) {
-                        Movie movieForDetail = bundle.getParcelable(MOVIE_PARCEL);
-                        String posterpath = movieForDetail.posterpath;
-                        Picasso.with(getActivity()).load(posterpath).into(poster);
-                        titleText.setText(movieForDetail.title);
-                        synopsisPlotText.setText(movieForDetail.overview);
-                        releaseDateText.setText(movieForDetail.releasedate);
-                        ratingText.setText(movieForDetail.rating);
-                    }
+                    titleText.setText(movieForDetail.title);
+                    synopsisPlotText.setText(movieForDetail.overview);
+                    releaseDateText.setText(movieForDetail.releasedate);
+                    ratingText.setText(movieForDetail.rating);
                 }
             }
 
