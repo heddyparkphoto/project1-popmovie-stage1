@@ -38,6 +38,9 @@
         </meta-data>
         </activity>
 
+        <provider
+            android:authorities="com.learn.heddy.awesomemovies"
+            android:name=".data.MovieProvider"/>
     </application>
 
 </manifest>

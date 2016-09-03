@@ -1,5 +1,6 @@
 package com.learn.heddy.awesomemovies.data;
 
+import android.content.ContentUris;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
@@ -8,16 +9,17 @@ import android.test.AndroidTestCase;
  */
 public class TestMovieContract  extends AndroidTestCase {
 
-    private static final long TEST_MOVIE_ID = 7899090000L;
+    private static final long TEST_AUTO_ID = 425L;
+    private static final String TEST_MOVIE_ID = "3940055000";
     private static final String TEST_MOVIE_CONTENT_URL_STRING = "content://com.learn.heddy.pickgoodmovie/movie";
     /*
         private static final String MOVIE_CONTENT_URI = "content://com.learn.heddy.pickgoodmovie/movie";
         private static final String MOVIE_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/com.learn.heddy.pickgoodmovie/movie";
     */
     public void testBuildMovieUriWithId() {
-        Uri testUri = MovieContract.MovieEntry.buildMovieUriWithId(TEST_MOVIE_ID);
+        Uri testUri = MovieContract.MovieEntry.buildMovieUriWithId(TEST_AUTO_ID);
 
-        assertEquals("Movie id Error.", testUri.getLastPathSegment(), String.valueOf(TEST_MOVIE_ID));
+        assertEquals("Movie id Error.", ContentUris.parseId(testUri), TEST_AUTO_ID);
     }
 
 //    public void testBaseContentUris() throws Throwable {
@@ -28,7 +30,7 @@ public class TestMovieContract  extends AndroidTestCase {
 //    }
 
     public void testGetOneMovieIdFromUri(){
-        Uri uri = Uri.parse(TEST_MOVIE_CONTENT_URL_STRING).buildUpon().appendPath(String.valueOf(TEST_MOVIE_ID)).build();
+        Uri uri = Uri.parse(TEST_MOVIE_CONTENT_URL_STRING).buildUpon().appendPath(TEST_MOVIE_ID).build();
 
         String movieId = MovieContract.MovieEntry.getOneMovieIdFromUri(uri);
 

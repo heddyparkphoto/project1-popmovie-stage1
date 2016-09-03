@@ -51,10 +51,12 @@ public class MovieContract {
 			===========================================================
 		*/
 
+        // This method is used in 2nd step of insert: id is the _ID returned from Database helper
         public static Uri buildMovieUriWithId(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
+        // extract and return one movie id as in /movie/123400000
         public static String getOneMovieIdFromUri(Uri uri) {
             return uri.getPathSegments().get(1);
         }
