@@ -61,9 +61,9 @@ public class MoviesFragment extends Fragment {
                         //Use Explicit Intent for Part 1 project
                         Intent intent = new Intent(getActivity(), DetailActivity.class);
                         Bundle mParcel = new Bundle();
-                        mParcel.putParcelable(DetailActivity.DetailFragment.MOVIE_PARCEL, mm);
+                        mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
 
-                        intent.putExtra(DetailActivity.DetailFragment.INTENT_PARCEL, mParcel);
+                        intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
                         startActivity(intent);
                     }
                 }

@@ -1,0 +1,8 @@
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/trailer_name"
+    android:text="@string/trailersList"
+    android:textSize="@dimen/abc_text_size_medium_material"
+    android:textColor="@color/colorMediumLabels" />

@@ -15,4 +15,6 @@
     </string>
     <string name="releaseDateText">Release Date unavailable</string>
     <string name="ratingText">Rating unavailable</string>
+    <string name="trailers">Trailers:</string>
+    <string name="trailersList">Trailer</string>
 </resources>
