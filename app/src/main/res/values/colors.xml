@@ -5,6 +5,8 @@
     <color name="colorAccent">#FF4081</color>
 
     <!-- Awesome Movies colors -->
-    <color name="colorMediumLabels">#ffe54aff</color>
-
+    <color name="movieMediumLabels">#ffe54aff</color>
+    <color name="movieLightImages">#88cc00</color>
+    <color name="movieHighlightLabel">#ffffff</color>
+    <color name="movieMediumImages">#448888</color>
 </resources>

@@ -142,7 +142,8 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
                 if ((null != checksite && "youtube".equalsIgnoreCase(checksite))
                         && (null != checktype && checktype.toLowerCase().indexOf("trailer") >= 0))
                 {
-                    returnList.add(n.getString("key")); //further parse once I learn how to play a video in different ways - only key needed for Intent.ACTION_VIEW
+                    // we'll format a String with 2 fields for convenience - key to play the Video, and name to display in the UI
+                    returnList.add(Utility.formatTrailerString(n.getString("key"), n.getString("name")));
                 }
             }
         } else if ("reviews".compareToIgnoreCase(name) == 0){
@@ -154,17 +155,19 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
 
             for (int i=0; i < results.length(); i++){
                 JSONObject n = results.getJSONObject(i);
-                String authors = n.getString("author");
+                String author = n.getString("author");
+                if (null==author){
+                    author="";
+                }
                 String fullcontent = n.getString("content");
                 if (null==fullcontent) {
                     fullcontent = "";
-                } else if (fullcontent.length() > 18){
-                    fullcontent = fullcontent.substring(0,18);
                 }
-                returnList.add(fullcontent); //further parse once I learn what to do with the database and files
+
+                returnList.add(fullcontent + " Author: "+author); //further parse once I learn what to do with the database and files
             }
         } else {
-
+            Log.e(LOG_TAG, "Unknown request: only videos or reviews allowed.");
         }
 
         return returnList;

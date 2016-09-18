@@ -13,8 +13,10 @@
         Plot goes here ... this could be a longer text area with 3-4 lines....
         Plot goes here ... this could be a longer text area with 3-4 lines....
     </string>
-    <string name="releaseDateText">Release Date unavailable</string>
+    <string name="releaseDateText">Release Date</string>
     <string name="ratingText">Rating unavailable</string>
     <string name="trailers">Trailers:</string>
     <string name="trailersList">Trailer</string>
+    <string name="reviews">Reviews:</string>
+    <string name="reviewsList">Reviews:</string>
 </resources>

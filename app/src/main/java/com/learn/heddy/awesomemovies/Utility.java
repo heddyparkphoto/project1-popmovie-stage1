@@ -3,11 +3,14 @@ package com.learn.heddy.awesomemovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  * Created by hyeryungpark on 9/16/16.
  */
 public class Utility {
+
+    private static final String COMMA = ",";
 
     public static boolean needExtraFetch(Context context) {
         String prefSortOption;
@@ -19,4 +22,15 @@ public class Utility {
         return !"favorites".equalsIgnoreCase(prefSortOption);
     }
 
+    public static String formatTrailerString(String key, String name) {
+
+        String retVal = key.concat(COMMA).concat(name);
+        Log.d("UTILITY", key + name + " returning " + retVal);
+        //return key.concat(COMMA).concat(name);
+        return retVal;
+    }
+
+    public static String getTrailerDelimeter() {
+        return COMMA;
+    }
 }

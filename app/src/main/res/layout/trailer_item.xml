@@ -4,5 +4,6 @@
     android:layout_height="wrap_content"
     android:id="@+id/trailer_name"
     android:text="@string/trailersList"
-    android:textSize="@dimen/abc_text_size_medium_material"
-    android:textColor="@color/colorMediumLabels" />
+    android:textAppearance="?android:attr/textAppearanceLarge"
+    android:textColor="@color/movieMediumLabels"
+    android:paddingBottom="4dp"/>

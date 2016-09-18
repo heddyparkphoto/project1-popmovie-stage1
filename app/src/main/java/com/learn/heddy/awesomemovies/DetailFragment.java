@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -36,10 +37,14 @@ public class DetailFragment extends Fragment {
     TextView mSynopsisPlotView;
     TextView mRatingView;
     TextView mReleaseDateView;
+    TextView mReviewsLinkView;
+    Button mFavoriteButtonView;
+
 
     //Trailers and Reviews Array
     ArrayAdapter<String> mTrailersAdapter; //trailers are another JSONARRAY, so for now, test with a string -just concat couple fields as String
     ArrayAdapter<String> mReviewsAdapter;
+    ArrayList<String> mTrailerKeyArrayList;
 
     String mMovieid;
     String mPosterpathTxt;
@@ -54,31 +59,31 @@ public class DetailFragment extends Fragment {
     static final String YOUTUBE_URL_BEGIN = "https://www.youtube.com/watch";
     static final String YOUTUBE_V_FIELD = "v";
 
-    static private ArrayList<String> testnamesResult;
-    static private ArrayList<String> reviewnamesResult;
-
+    static private ArrayList<String> trailerApiResult;    // trailers api result collection
+    static private ArrayList<String> reviewApiResult;     // reviews api result collection
 
     private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
-    public DetailFragment(){
+    public DetailFragment() {
         setHasOptionsMenu(true);
     }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         // finish Views
-        mPosterImageView = (ImageView)rootView.findViewById(R.id.posterImage);
-        mTitleView = (TextView)rootView.findViewById(R.id.titleText);
+        mPosterImageView = (ImageView) rootView.findViewById(R.id.posterImage);
+        mTitleView = (TextView) rootView.findViewById(R.id.titleText);
         mSynopsisPlotView = (TextView) rootView.findViewById(R.id.synopsisPlotText);
         mRatingView = (TextView) rootView.findViewById(R.id.ratingText);
         mReleaseDateView = (TextView) rootView.findViewById(R.id.releaseDateText);
 
         Intent intent = getActivity().getIntent();
 
-        if (null!=intent && null!=intent.getBundleExtra(INTENT_PARCEL)) {
+        if (null != intent && null != intent.getBundleExtra(INTENT_PARCEL)) {
             Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
-            if (bundle.getParcelable(MOVIE_PARCEL)!= null) {
+            if (bundle.getParcelable(MOVIE_PARCEL) != null) {
                 mMovie = bundle.getParcelable(MOVIE_PARCEL);
             }
         }
@@ -89,31 +94,43 @@ public class DetailFragment extends Fragment {
         }
 
         // Set up for trailers list section
-        ListView trailersList = (ListView)rootView.findViewById(R.id.listview_trailer);
+        ListView trailersList = (ListView) rootView.findViewById(R.id.listview_trailer);
         mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item); //layout not the view
         trailersList.setAdapter(mTrailersAdapter);
 
         trailersList.setOnItemClickListener(
-                new AdapterView.OnItemClickListener(){
+                new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String urlAsString = mTrailersAdapter.getItem(position);
-                        Log.d(LOG_TAG, "trailer key "+urlAsString);
+                        String urlAsString = "";
+                        //String keyName = mTrailersAdapter.getItem(position);
+                        //int delimPos = keyName.indexOf(Utility.getTrailerDelimeter());
+                        if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > position) {
+                            //     String urlAsString = keyName.substring(0, delimPos);
+                            urlAsString = mTrailerKeyArrayList.get(position);
 
-                        Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
-                                .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
-                                .build();
-                        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                            startActivity(intent);
-                        } else {
-                            //Display error message
-                            Toast.makeText(getActivity(), "Sorry, cannot play video", Toast.LENGTH_LONG).show();
+                            //Log.d(LOG_TAG, "whole " + keyName + " trailer key " + urlAsString);
+
+                            Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
+                                    .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
+                                    .build();
+                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                startActivity(intent);
+                            } else {
+                                //Display error message
+                                Toast.makeText(getActivity(), "Sorry, cannot play video", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }
                 }
         );
 
+//        // Set up for reviews list section
+//        ListView reviewsList = (ListView)rootView.findViewById(R.id.listview_reviews);
+//        mReviewsAdapter = new ArrayAdapter<String>(getActivity(), R.layout.review_item); //layout not the view
+//        reviewsList.setAdapter(mReviewsAdapter);
+//
         // TRY HERE then move to Utility class
         // Preference sort option from SharedPreferences
 //        String prefSortOption;
@@ -145,41 +162,18 @@ public class DetailFragment extends Fragment {
         mReleaseDateView.setText(mMovie.releasedate);
         mRatingView.setText(mMovie.rating);
 
-        // Fetch data
-        String[] result;
-        FetchMovieExtras myfetch;
-
         mMovieid = mMovie.id;
 
         if (needExtraFetch) {
-            //trailers Async
-            String[] videoParams = new String[2];
-            videoParams[0] = mMovie.id;
-            videoParams[1] = "videos";
 
-            myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(videoParams);
-            // testnamesResult = myfetch.trailersName; // trailerName was blank
+            handleTrailers(rootView);
+            handleMarkFavorites(rootView);
+            handleReviews(rootView);
 
-            try {
-                testnamesResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
-                if (null != testnamesResult) {
-                    Log.v(LOG_TAG, " testnamesResult length from async " + testnamesResult.size());
+        } else {
 
+            mFavoriteButtonView.setVisibility(Button.INVISIBLE);
 
-                    for (String s : testnamesResult) {
-                        mTrailersAdapter.add(s);
-                    }
-
-//                    if (testnamesResult != null && testnamesResult.size() > 0) {
-//                        mSharedTrailerUri = testnamesResult.get(0);
-//                    }
-                } else {
-                    Log.v(LOG_TAG, " testnamesResult is null still!");
-                }
-
-            } catch (Exception allEx) {
-                Log.e(LOG_TAG, " Trailers async task exception " + allEx);
-            }
         }
 
         return rootView;
@@ -189,9 +183,116 @@ public class DetailFragment extends Fragment {
         needExtraFetch = boolValue;
     }
 
-    public boolean getNeedExtraFetch(){
+    public boolean getNeedExtraFetch() {
         return needExtraFetch;
     }
 
+    // Awesome Movies Trailers
+    private void handleTrailers(View parent) {
+
+        String[] result;
+        FetchMovieExtras myfetch;
+
+        //trailers Async
+        String[] videoParams = new String[2];
+        videoParams[0] = mMovie.id;
+        videoParams[1] = "videos";
+
+        myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(videoParams);
+        // testnamesResult = myfetch.trailersName; // trailerName was blank
+
+        try {
+            trailerApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
+            if (null != trailerApiResult) {
+                int tSize = trailerApiResult.size();
+                Log.v(LOG_TAG, " testnamesResult length from async " + trailerApiResult.size());
+
+                mTrailerKeyArrayList = new ArrayList<String>(tSize);
+
+                String delim = Utility.getTrailerDelimeter();
+                int delimPos = 0;
+
+                for (String s : trailerApiResult) {
+                    delimPos = s.indexOf(delim);
+                    mTrailerKeyArrayList.add(s.substring(0, delimPos));
+                    mTrailersAdapter.add(s.substring(delimPos + 1));
+                }
+
+//                    if (testnamesResult != null && testnamesResult.size() > 0) {
+//                        mSharedTrailerUri = testnamesResult.get(0);
+//                    }
+            } else {
+                Log.v(LOG_TAG, " testnamesResult is null still!");
+            }
+
+        } catch (Exception allEx) {
+            Log.e(LOG_TAG, " Trailers async task exception " + allEx);
+        }
+    }
+
+
+    // Awesome Movies Reviews
+    private void handleReviews(View parent) {
+        mReviewsLinkView = (TextView) parent.findViewById(R.id.readReviewsLink);
+        mReviewsLinkView.setClickable(true);
+        mReviewsLinkView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Set on Bundle the Parcelable Movie object
+                //Use Explicit Intent to ReviewsActivity
+                Intent intent = new Intent(getActivity(), ReviewsActivity.class);
+                Bundle mParcel = new Bundle();
+                mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mMovie);
+
+                intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
+                startActivity(intent);
+
+
+                //Toast.makeText(getActivity(), "Got it!!", Toast.LENGTH_LONG).show();
+//                String[] result;
+//                FetchMovieExtras myfetch;
+//
+//                String[] reviewsParams = new String[2];
+//                reviewsParams[0] = mMovie.id;
+//                reviewsParams[1] = "reviews";
+//
+//                myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(reviewsParams);
+//
+//                try {
+//                    reviewApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
+//                    if (null != reviewApiResult && reviewApiResult.size() > 0) {
+//                        Log.v(LOG_TAG, " reviewApiResult length from async " + reviewApiResult.size());
+//
+//                            for (String s: reviewApiResult){
+//                                mReviewsAdapter.add(s);
+//                            }
+//
+//                    } else {
+//                        Log.v(LOG_TAG, " reviewApiResult is null still!");
+//                    }
+//
+//                } catch (Exception allEx) {
+//                    Log.e(LOG_TAG, " Reviews async task  exception " + allEx);
+//                }
+
+
+            }
+        });
+    }
+
+    // Favorites
+    private void handleMarkFavorites(View parent) {
+
+        // Set up Mark-favorite Button - this action needs to Database action
+        mFavoriteButtonView = (Button) parent.findViewById(R.id.mark_favorite);
+
+        mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick (View v){
+            Toast.makeText(getActivity(), "Clicked!", Toast.LENGTH_LONG).show();
+            }
+        });
+
+    }
 
 }
