@@ -11,7 +11,7 @@ import com.learn.heddy.awesomemovies.data.MovieContract.MovieEntry;
 public class MovieDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;  // RATING & RELEASE DATE type changed
     static final String DATABASE_NAME = "movie.db";
 
     public MovieDbHelper(Context context){
@@ -26,8 +26,8 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_POSTERPATH + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_TITLE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL," +
-                MovieEntry.COLUMN_RATING + " REAL NOT NULL, " +
-                MovieEntry.COLUMN_RELEASEDATE + " INTEGER NOT NULL)";
+                MovieEntry.COLUMN_RATING + " TEXT NOT NULL, " +
+                MovieEntry.COLUMN_RELEASEDATE + " TEXT NOT NULL)";
 
         sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_TABLE);
     }

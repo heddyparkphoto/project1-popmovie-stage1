@@ -101,8 +101,8 @@ public class ListFavoriteFragment extends Fragment implements LoaderManager.Load
                             mm.posterpath = itemCursor.getString(COL_POSTER_FILE_PATH);
                             mm.title = itemCursor.getString(COL_TITLE);
                             mm.overview = itemCursor.getString(COL_OVERVIEW);
-                            mm.rating = Float.toString(itemCursor.getFloat(COL_RATING));
-                            mm.releasedate = Integer.toString(itemCursor.getInt(COL_RELEASEDATE));
+                            mm.rating = itemCursor.getString(COL_RATING);
+                            mm.releasedate = itemCursor.getString(COL_RELEASEDATE);
 
                             Intent intent = new Intent(getActivity(), DetailActivity.class);
                             Bundle mParcel = new Bundle();
