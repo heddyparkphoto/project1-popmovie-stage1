@@ -4,6 +4,7 @@
     <string name="title_sort_by">Sort Option</string>
     <string name="pref_sort_by_key">sort_option</string>
     <string name="pref_default_sort_by">top_rated</string>
+    <string name="favorites">favorites</string>
     <string name="title_action_settings">Settings</string>
     <string name="movie_title">Movie Title</string>
     <string name="description_text">Plot goes here ... this could be a longer text area with 3-4 lines....

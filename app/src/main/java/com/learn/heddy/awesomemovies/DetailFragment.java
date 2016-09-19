@@ -1,6 +1,12 @@
 package com.learn.heddy.awesomemovies;
 
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,8 +23,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.learn.heddy.awesomemovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 
 /**
@@ -43,15 +53,7 @@ public class DetailFragment extends Fragment {
 
     //Trailers and Reviews Array
     ArrayAdapter<String> mTrailersAdapter; //trailers are another JSONARRAY, so for now, test with a string -just concat couple fields as String
-    ArrayAdapter<String> mReviewsAdapter;
-    ArrayList<String> mTrailerKeyArrayList;
-
-    String mMovieid;
-    String mPosterpathTxt;
-    String mTitleTxt;
-    String mPlotTxt;
-    String mRatingTxt;
-    String mReleasedateTxt;
+    //ArrayAdapter<String> mReviewsAdapter;
 
     // Flag to make extra api calls for trailers and reviews
     private boolean needExtraFetch;
@@ -59,6 +61,7 @@ public class DetailFragment extends Fragment {
     static final String YOUTUBE_URL_BEGIN = "https://www.youtube.com/watch";
     static final String YOUTUBE_V_FIELD = "v";
 
+    ArrayList<String> mTrailerKeyArrayList;
     static private ArrayList<String> trailerApiResult;    // trailers api result collection
     static private ArrayList<String> reviewApiResult;     // reviews api result collection
 
@@ -86,10 +89,20 @@ public class DetailFragment extends Fragment {
             if (bundle.getParcelable(MOVIE_PARCEL) != null) {
                 mMovie = bundle.getParcelable(MOVIE_PARCEL);
             }
+
+           // Log.d(LOG_TAG, "Intent not null!");
         }
 
+//        if (savedInstanceState!=null){
+//            if (savedInstanceState.getParcelable(MOVIE_PARCEL)!=null){
+//                mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
+//            }
+//
+//            Log.d(LOG_TAG, "savedInstanceState not null");
+//        }
+
         if (null == mMovie) {
-            Log.e(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
+         //   Log.e(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
             return rootView;
         }
 
@@ -155,14 +168,19 @@ public class DetailFragment extends Fragment {
         if (needExtraFetch) {
             Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
         } else {
-            // CODE AFTER THE DB is done
+            mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            File posterfile = getFileInInternalStorage(mMovie.title);
+            if (posterfile != null) {
+                Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
+            } else {
+                Log.e(LOG_TAG, "Image for poster not found.");
+            }
         }
+
         mTitleView.setText(mMovie.title);
         mSynopsisPlotView.setText(mMovie.overview);
         mReleaseDateView.setText(mMovie.releasedate);
         mRatingView.setText(mMovie.rating);
-
-        mMovieid = mMovie.id;
 
         if (needExtraFetch) {
 
@@ -205,7 +223,7 @@ public class DetailFragment extends Fragment {
             trailerApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
             if (null != trailerApiResult) {
                 int tSize = trailerApiResult.size();
-                Log.v(LOG_TAG, " testnamesResult length from async " + trailerApiResult.size());
+              //  Log.v(LOG_TAG, " testnamesResult length from async " + trailerApiResult.size());
 
                 mTrailerKeyArrayList = new ArrayList<String>(tSize);
 
@@ -218,11 +236,11 @@ public class DetailFragment extends Fragment {
                     mTrailersAdapter.add(s.substring(delimPos + 1));
                 }
 
-//                    if (testnamesResult != null && testnamesResult.size() > 0) {
+//                    if (trailerApiResult != null && trailerApiResult.size() > 0) {
 //                        mSharedTrailerUri = testnamesResult.get(0);
 //                    }
             } else {
-                Log.v(LOG_TAG, " testnamesResult is null still!");
+        //        Log.v(LOG_TAG, " trailerApiResult is null still!");
             }
 
         } catch (Exception allEx) {
@@ -289,10 +307,109 @@ public class DetailFragment extends Fragment {
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View v){
-            Toast.makeText(getActivity(), "Clicked!", Toast.LENGTH_LONG).show();
+
+                //If the movie id already exists, do not insert - DB error can crash the app
+                Uri queryUri = MovieContract.MovieEntry.buildMovieUriWithId(Long.valueOf(mMovie.id));
+                Cursor c = getActivity().getContentResolver().query(queryUri, null, null, null, null);
+                if (c.getCount() > 0){
+                    Log.d(LOG_TAG, "Exists in the Database.");
+                } else {
+
+                    //addToGoodMovieDatabase
+                    ContentValues values = new ContentValues();
+
+                    values.put(MovieContract.MovieEntry.COLUMN_ID, mMovie.id);
+                    values.put(MovieContract.MovieEntry.COLUMN_POSTERPATH, mMovie.posterpath);
+                    values.put(MovieContract.MovieEntry.COLUMN_TITLE, mMovie.title);
+                    values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, mMovie.overview);
+                    values.put(MovieContract.MovieEntry.COLUMN_RATING, mMovie.rating);
+                    values.put(MovieContract.MovieEntry.COLUMN_RELEASEDATE, mMovie.releasedate);
+
+                    Uri uri = getActivity().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
+                    if (ContentUris.parseId(uri) != -1) {
+                        Log.d(LOG_TAG, "uri inserted " + uri.toString());
+
+                                /* target is inner class, Picasso fetches the poster image from online
+                                   and saves into a target which is an image file of the internal storage
+                                    - I did not try another storage, but after trying to use External storage that did not work
+                                   it is an option that worked with my current very limited knowledge of the Android Emulator
+                                */
+                        Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
+                    } else {
+                        Log.e(LOG_TAG, "ERROR INSERTING FAVORITES.");
+                    }
+                }
             }
         });
 
+        Log.v(LOG_TAG, " Good so far?? ");
+    }
+
+    /*
+         Save poster image to a file
+      */
+    public final static String POSTER_FOLDER = "movieposters";
+    File file;
+
+    private Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    File file = getFileInInternalStorage(mMovie.title);
+                    try {
+                        file.createNewFile();
+                        FileOutputStream ostream = new FileOutputStream(file);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 75, ostream);
+                        ostream.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }).start();
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+            if (placeHolderDrawable != null) {
+            }
+        }
+    };
+
+    private File getFileInInternalStorage(String titleFile){
+        //in order to test read back from the stored file, create a file in the setUp() step.
+        File folder = getActivity().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
+
+        if (!folder.exists()){
+            folder.mkdir();
+        }
+
+        return new File(folder + File.separator + titleFile + ".jpg");
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        if (mMovie!=null){
+            outState.putParcelable(MOVIE_PARCEL, mMovie);
+            Log.d(LOG_TAG, "onSaveInstanceState - saving my movie");
+        } else {
+            Log.d(LOG_TAG, "onSaveInstanceState - mMovie is null....");
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    public void onSortOptionChanged(String newMovieId){
+        // For now just log it
+        Log.d(LOG_TAG, "newMovieId "+newMovieId);
     }
 
 }

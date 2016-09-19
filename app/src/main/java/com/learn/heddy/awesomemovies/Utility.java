@@ -33,4 +33,11 @@ public class Utility {
     public static String getTrailerDelimeter() {
         return COMMA;
     }
+
+    public static String getPreferredSortOption(Context context) {
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString(context.getString(R.string.pref_sort_by_key),
+                context.getString(R.string.pref_default_sort_by));
+    }
 }

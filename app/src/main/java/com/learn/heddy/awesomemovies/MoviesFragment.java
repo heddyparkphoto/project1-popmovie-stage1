@@ -2,11 +2,9 @@ package com.learn.heddy.awesomemovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -74,20 +72,18 @@ public class MoviesFragment extends Fragment {
     private void updateAwesomeMovies(){
 
         // Preference sort option from SharedPreferences
-        String prefSortOption;
+        String prefSortOption = Utility.getPreferredSortOption(getActivity());
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        prefSortOption = sharedPreferences.getString(
-                getString(R.string.pref_sort_by_key), getString(R.string.pref_default_sort_by));
-
-        if (isOnLine()) {
-            FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity(), mMoviePosterAdapter);
-            // sort by user Settings preference
-            fetchMoviesTask.execute(prefSortOption);
-        } else {
-            Toast.makeText(getActivity(),
-                    "No network connection.  Could not load a new set.  Please check your network connection.",
-                    Toast.LENGTH_LONG).show();
+        if (getContext().getString(R.string.favorites).compareTo(prefSortOption) != 0) {
+            if (isOnLine()) {
+                FetchMoviesTask fetchMoviesTask = new FetchMoviesTask(getActivity(), mMoviePosterAdapter);
+                // sort by user Settings preference
+                fetchMoviesTask.execute(prefSortOption);
+            } else {
+                Toast.makeText(getActivity(),
+                        "No network connection.  Could not load a new set.  Please check your network connection.",
+                        Toast.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -98,5 +94,13 @@ public class MoviesFragment extends Fragment {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
         return (netInfo != null && netInfo.isConnectedOrConnecting());
+    }
+
+    /*
+        Movie DetailFragment Callback for when an item has been selected.
+     */
+    public interface OnMainMovieItemSelectedListener {
+
+        public void OnMainMovieItemClick(Movie movieItem);
     }
 }
