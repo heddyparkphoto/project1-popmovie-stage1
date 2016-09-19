@@ -1,5 +1,6 @@
 package com.learn.heddy.awesomemovies;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ public class ListFavoriteFragment extends Fragment implements LoaderManager.Load
 
     /* Cursor variables */
     static final String[] FAVORITE_COLUMNS = {
+            MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_ID,
             MovieContract.MovieEntry.COLUMN_POSTERPATH,
             MovieContract.MovieEntry.COLUMN_TITLE,
@@ -92,21 +94,31 @@ public class ListFavoriteFragment extends Fragment implements LoaderManager.Load
                     public void onItemClick(AdapterView adapterView, View view, int position, long l) {
                         //CursorLoader returns the cursor on the position, null if it cannot seek to that position
                         Cursor itemCursor = (Cursor) adapterView.getItemAtPosition(position);
+                        if (null!=itemCursor) {
+                            //itemCursor is that a Movie?  may need to Serialize into an Object
+                            Movie mm = new Movie();
+                            mm.id = Integer.toString(itemCursor.getInt(COL_MOVIE_ID));
+                            mm.posterpath = itemCursor.getString(COL_POSTER_FILE_PATH);
+                            mm.title = itemCursor.getString(COL_TITLE);
+                            mm.overview = itemCursor.getString(COL_OVERVIEW);
+                            mm.rating = Float.toString(itemCursor.getFloat(COL_RATING));
+                            mm.releasedate = Integer.toString(itemCursor.getInt(COL_RELEASEDATE));
 
-                        //itemCursor is that a Movie?  may need to Serialize into an Object
-                        Movie mm = new Movie();
-                        mm.id = Integer.toString(itemCursor.getInt(COL_MOVIE_ID));
-                        mm.posterpath = itemCursor.getString(COL_POSTER_FILE_PATH);
-                        mm.title = itemCursor.getString(COL_TITLE);
-                        mm.overview = itemCursor.getString(COL_OVERVIEW);
-                        mm.rating = Float.toString(itemCursor.getFloat(COL_RATING));
-                        mm.releasedate = Integer.toString(itemCursor.getInt(COL_RELEASEDATE));
-                    /*
-                        twoPane additions
-                     */
-                        //mPosition = position;
-                        ((MoviesFragment.OnMainMovieItemSelectedListener)getActivity()).OnMainMovieItemClick(mm);
-                        //Log.d(LOG_TAG, "Clicked!");
+                            Intent intent = new Intent(getActivity(), DetailActivity.class);
+                            Bundle mParcel = new Bundle();
+                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
+
+                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
+                            startActivity(intent);
+
+                            /*
+                                TO-DO:  twoPane additions
+                             */
+                            //mPosition = position;
+
+//                            ((MoviesFragment.OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
+                            //Log.d(LOG_TAG, "Clicked!");
+                        }
                     }
                 }
         );
@@ -194,5 +206,15 @@ public void onSaveInstanceState(Bundle outState) {
     public void onResume() {
         Log.d(LOG_TAG, "onResume");
         super.onResume();
+    }
+
+    /*
+    Movie DetailFragment Callback for when an item has been selected.
+ */
+    public interface OnFavoriteMovieItemSelectedListener {
+
+        public void OnFavoriteMovieItemClick(Uri favoriteDetailUri);
+
+
     }
 }

@@ -41,14 +41,17 @@ public class DetailFragment extends Fragment {
     public static final String INTENT_PARCEL = "INTENT_PARCEL";
     public static final String MOVIE_PARCEL = "MOVIE_PARCEL";
 
-    Movie mMovie;
-    ImageView mPosterImageView;
-    TextView mTitleView;
-    TextView mSynopsisPlotView;
-    TextView mRatingView;
-    TextView mReleaseDateView;
-    TextView mReviewsLinkView;
-    Button mFavoriteButtonView;
+    private Movie mMovie;
+    private ImageView mPosterImageView;
+    private TextView mTitleView;
+    private TextView mSynopsisPlotView;
+    private TextView mRatingView;
+    private TextView mReleaseDateView;
+    private TextView mReviewsLinkView;
+    private Button mFavoriteButtonView;
+    private TextView mTrailerTitleView;
+    private TextView mRequestReviewLinkView;
+
 
 
     //Trailers and Reviews Array
@@ -67,6 +70,7 @@ public class DetailFragment extends Fragment {
 
     private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
+
     public DetailFragment() {
         setHasOptionsMenu(true);
     }
@@ -81,6 +85,8 @@ public class DetailFragment extends Fragment {
         mSynopsisPlotView = (TextView) rootView.findViewById(R.id.synopsisPlotText);
         mRatingView = (TextView) rootView.findViewById(R.id.ratingText);
         mReleaseDateView = (TextView) rootView.findViewById(R.id.releaseDateText);
+        mTrailerTitleView = (TextView) rootView.findViewById(R.id.trailer_title);
+        mReviewsLinkView = (TextView) rootView.findViewById(R.id.readReviewsLink);
 
         Intent intent = getActivity().getIntent();
 
@@ -182,16 +188,20 @@ public class DetailFragment extends Fragment {
         mReleaseDateView.setText(mMovie.releasedate);
         mRatingView.setText(mMovie.rating);
 
+        // Set up Action Button
+        handleMarkFavorites(rootView);
+
         if (needExtraFetch) {
 
             handleTrailers(rootView);
-            handleMarkFavorites(rootView);
             handleReviews(rootView);
-
         } else {
-
-            mFavoriteButtonView.setVisibility(Button.INVISIBLE);
-
+            if (null != mTrailerTitleView) {
+                mTrailerTitleView.setVisibility(View.INVISIBLE);
+            }
+            if (null != mReviewsLinkView) {
+                mReviewsLinkView.setVisibility(View.INVISIBLE);
+            }
         }
 
         return rootView;
@@ -303,6 +313,9 @@ public class DetailFragment extends Fragment {
 
         // Set up Mark-favorite Button - this action needs to Database action
         mFavoriteButtonView = (Button) parent.findViewById(R.id.mark_favorite);
+        if (!needExtraFetch) {
+            mFavoriteButtonView.setVisibility(View.INVISIBLE);
+        }
 
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
             @Override

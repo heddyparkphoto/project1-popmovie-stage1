@@ -12,18 +12,34 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DETAILFRAGMENT";
-    boolean mTwoPane;
+    boolean mTwoPane = false;   // Until Tablet layout, it's false.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (savedInstanceState == null){
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.mainactivity_container, new MoviesFragment())
-                    .commit();
-         }
+
+        String sortOption = Utility.getPreferredSortOption(this);
+
+//        if (savedInstanceState == null){
+//            getSupportFragmentManager().beginTransaction()
+//                    .add(R.id.mainactivity_container, new MoviesFragment())
+//                    .commit();
+//         }
+
+        if (savedInstanceState == null) {
+            if (sortOption.equalsIgnoreCase(getString(R.string.favorites))){
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.mainactivity_container, new ListFavoriteFragment())
+                        .commit();
+            } else {
+                getSupportFragmentManager().beginTransaction()
+                        .add(R.id.mainactivity_container, new MoviesFragment())
+                        .commit();
+            }
+        }
+
     }
 
     @Override
@@ -88,7 +104,13 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
     public void OnMainMovieItemClick(Movie movieItem) {
         boolean needExtraFetch = Utility.needExtraFetch(this);
 
-        if (mTwoPane){
+        if (movieItem!=null){
+            Log.d(LOG_TAG, "OnMainMovieItemClick - Movie passed in success.");
+        }
+        else {
+            Log.d(LOG_TAG, "OnMainMovieItemClick- but PASSED IN NULL MOVIE ...");
+        }
+//        if (mTwoPane){
 
             DetailFragment df = new DetailFragment();
             Bundle args = new Bundle();
@@ -98,17 +120,18 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
             df.setNeedExtraFetch(needExtraFetch);
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id., df);
+            transaction.replace(R.id.detailcontainer, df);
             transaction.addToBackStack(null);
 
             transaction.commit();
-        } else {
+//        } else {
             /*
                 This snippet replaces what the MovieFragment was doing
              */
-            Intent intent = new Intent(this, DetailActivity.class);
-            intent.putExtra(DetailFragment.MOVIE_PARCEL, movieItem);
-            startActivity(intent);
-        }
+//            Intent intent = new Intent(this, DetailActivity.class);
+//            intent.putExtra(DetailFragment.MOVIE_PARCEL, movieItem);
+//            startActivity(intent);
+//        }
     }
+
 }
