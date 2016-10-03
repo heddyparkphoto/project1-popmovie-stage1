@@ -1,10 +1,7 @@
 package com.learn.heddy.awesomemovies;
 
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -23,7 +20,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.learn.heddy.awesomemovies.data.MovieContract;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -195,14 +191,15 @@ public class DetailFragment extends Fragment {
 
             handleTrailers(rootView);
             handleReviews(rootView);
-        } else {
-            if (null != mTrailerTitleView) {
-                mTrailerTitleView.setVisibility(View.INVISIBLE);
-            }
-            if (null != mReviewsLinkView) {
-                mReviewsLinkView.setVisibility(View.INVISIBLE);
-            }
         }
+//        else {
+//            if (null != mTrailerTitleView) {
+//                mTrailerTitleView.setVisibility(View.INVISIBLE);
+//            }
+//            if (null != mReviewsLinkView) {
+//                mReviewsLinkView.setVisibility(View.INVISIBLE);
+//            }
+//        }
 
         return rootView;
     }
@@ -311,56 +308,85 @@ public class DetailFragment extends Fragment {
     // Favorites
     private void handleMarkFavorites(View parent) {
 
+        final boolean isAdd;
+        final boolean isRemove;
+
         // Set up Mark-favorite Button - this action needs to Database action
         mFavoriteButtonView = (Button) parent.findViewById(R.id.mark_favorite);
         if (!needExtraFetch) {
-            mFavoriteButtonView.setVisibility(View.INVISIBLE);
+            //mFavoriteButtonView.setVisibility(View.INVISIBLE);
+            mFavoriteButtonView.setText("Remove");
+            isAdd = false;
+            isRemove = true;
+
+            if (null != mTrailerTitleView) {
+                mTrailerTitleView.setVisibility(View.INVISIBLE);
+            }
+            if (null != mReviewsLinkView) {
+                mReviewsLinkView.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            isAdd = true;
+            isRemove = false;
         }
+
+        Log.v(LOG_TAG, "In handleMarkFavorites ");
 
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick (View v){
 
-                //If the movie id already exists, do not insert - DB error can crash the app
-                Uri queryUri = MovieContract.MovieEntry.buildMovieUriWithId(Long.valueOf(mMovie.id));
-                Cursor c = getActivity().getContentResolver().query(queryUri, null, null, null, null);
-                if (c.getCount() > 0){
-                    Log.d(LOG_TAG, "Exists in the Database.");
-                } else {
+                //AddFavoriteMovieTask asyncAddTask = new AddFavoriteMovieTask(getActivity(), true, false);
+                AddFavoriteMovieTask asyncAddTask = new AddFavoriteMovieTask(getActivity(), isAdd, isRemove);
 
-                    //addToGoodMovieDatabase
-                    ContentValues values = new ContentValues();
+                asyncAddTask.execute(mMovie);
 
-                    values.put(MovieContract.MovieEntry.COLUMN_ID, mMovie.id);
-                    values.put(MovieContract.MovieEntry.COLUMN_POSTERPATH, mMovie.posterpath);
-                    values.put(MovieContract.MovieEntry.COLUMN_TITLE, mMovie.title);
-                    values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, mMovie.overview);
-                    values.put(MovieContract.MovieEntry.COLUMN_RATING, mMovie.rating);
-                    values.put(MovieContract.MovieEntry.COLUMN_RELEASEDATE, mMovie.releasedate);
-
-                    Uri uri = getActivity().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
-                    if (ContentUris.parseId(uri) != -1) {
-                        Log.d(LOG_TAG, "uri inserted " + uri.toString());
-
-                                /* target is inner class, Picasso fetches the poster image from online
-                                   and saves into a target which is an image file of the internal storage
-                                    - I did not try another storage, but after trying to use External storage that did not work
-                                   it is an option that worked with my current very limited knowledge of the Android Emulator
-                                */
-                        Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
-                    } else {
-                        Log.e(LOG_TAG, "ERROR INSERTING FAVORITES.");
-                    }
-                }
+                // Save the poster image to a File system to save space in the Database
+                Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
             }
         });
 
         Log.v(LOG_TAG, " Good so far?? ");
     }
 
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        if (mMovie!=null){
+            outState.putParcelable(MOVIE_PARCEL, mMovie);
+            Log.d(LOG_TAG, "onSaveInstanceState - saving my movie");
+        } else {
+            Log.d(LOG_TAG, "onSaveInstanceState - mMovie is null....");
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    public void onSortOptionChanged(String newMovieId){
+        // For now just log it
+        Log.d(LOG_TAG, "newMovieId "+newMovieId);
+    }
+
+        /*
+        Poster image stored in a File: made public to use Detail Fragment View for the Favorite Detail as well.
+     */
+
+    public File getFileInInternalStorage(String titleAsName){
+
+        File folder = getContext().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
+
+        if (!folder.exists()){
+            Log.e(LOG_TAG, "Error folder not found.");
+            return null;
+        }
+
+        return new File(folder + File.separator + titleAsName + ".jpg");
+    }
+
+
     /*
-         Save poster image to a file
-      */
+    Save poster image to a file
+ */
     public final static String POSTER_FOLDER = "movieposters";
     File file;
 
@@ -395,34 +421,4 @@ public class DetailFragment extends Fragment {
             }
         }
     };
-
-    private File getFileInInternalStorage(String titleFile){
-        //in order to test read back from the stored file, create a file in the setUp() step.
-        File folder = getActivity().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
-
-        if (!folder.exists()){
-            folder.mkdir();
-        }
-
-        return new File(folder + File.separator + titleFile + ".jpg");
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-        if (mMovie!=null){
-            outState.putParcelable(MOVIE_PARCEL, mMovie);
-            Log.d(LOG_TAG, "onSaveInstanceState - saving my movie");
-        } else {
-            Log.d(LOG_TAG, "onSaveInstanceState - mMovie is null....");
-        }
-        super.onSaveInstanceState(outState);
-    }
-
-    public void onSortOptionChanged(String newMovieId){
-        // For now just log it
-        Log.d(LOG_TAG, "newMovieId "+newMovieId);
-    }
-
 }

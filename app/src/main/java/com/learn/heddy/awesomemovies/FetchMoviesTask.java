@@ -50,7 +50,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
             // on the movie api site "/movie/popular may return the same result, but /discover/movie? offers slew of filters.."
 //            final String MOVIES_API_BASE_URL = "http://api.themoviedb.org/3/movie";
             final String MY_KEY_PARAM = "api_key";
-//            final String MY_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;  //CAUTION!!!! DO NOT DISTRIBUTE THE KEY TO PUBLIC@@@@@@
+            final String MY_KEY = BuildConfig.THE_MOVIE_DB_API_KEY;  //CAUTION!!!! DO NOT DISTRIBUTE THE KEY TO PUBLIC@@@@@@
 //
 //            Uri builtUri = Uri.parse(MOVIES_API_BASE_URL).buildUpon()
 //                    .appendPath(optionBy[0])
@@ -98,7 +98,7 @@ public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
             moviesJsonStr = buffer.toString();
 
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Error ", e);
+            Log.e(LOG_TAG, "Error "+ e.toString(), e);
             // If the code didn't successfully get the movie data, there's no point in attempting
             // to parse it.
             return null;
