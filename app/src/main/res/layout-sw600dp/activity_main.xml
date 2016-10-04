@@ -12,18 +12,21 @@
     This layout is a two-pane layout for the Items master/detail flow.
     -->
 
-    <fragment
-        android:id="@+id/gridview_movies"
-        android:name="com.learn.heddy.awesomemovies.MoviesFragment"
+    <FrameLayout
+        android:id="@+id/mainactivity_container"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="2"
-        tools:layout="@android:layout/list_content" />
+        android:layout_weight="1"
+        tools:context=".MoviesFragment">
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/detailcontainer"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="4" />
+        android:layout_weight="1"
+        >
+
+    </FrameLayout>
 
 </LinearLayout>

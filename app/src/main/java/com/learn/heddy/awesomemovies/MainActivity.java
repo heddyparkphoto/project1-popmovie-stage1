@@ -12,7 +12,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DETAILFRAGMENT";
-    boolean mTwoPane = false;   // Until Tablet layout, it's false.
+    public boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,16 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 //                    .add(R.id.mainactivity_container, new MoviesFragment())
 //                    .commit();
 //         }
+
+        if (findViewById(R.id.detailcontainer) != null){
+            mTwoPane = true;
+
+            if (savedInstanceState == null){
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.detailcontainer, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        }
 
         if (savedInstanceState == null) {
             if (sortOption.equalsIgnoreCase(getString(R.string.favorites))){
