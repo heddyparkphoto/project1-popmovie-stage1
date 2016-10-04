@@ -1,6 +1,5 @@
 package com.learn.heddy.awesomemovies;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -104,19 +103,19 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
                             mm.rating = itemCursor.getString(COL_RATING);
                             mm.releasedate = itemCursor.getString(COL_RELEASEDATE);
 
-                            Intent intent = new Intent(getActivity(), DetailActivity.class);
-                            Bundle mParcel = new Bundle();
-                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
-
-                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
-                            startActivity(intent);
+//                            Intent intent = new Intent(getActivity(), DetailActivity.class);
+//                            Bundle mParcel = new Bundle();
+//                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
+//
+//                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
+//                            startActivity(intent);
 
                             /*
                                 TO-DO:  twoPane additions
                              */
                             //mPosition = position;
 
-//                            ((MoviesFragment.OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
+                            ((MoviesFragment.OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
                             //Log.d(LOG_TAG, "Clicked!");
                         }
                     }

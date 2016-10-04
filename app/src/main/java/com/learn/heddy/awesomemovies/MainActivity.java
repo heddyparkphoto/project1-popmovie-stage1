@@ -124,7 +124,10 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 
             DetailFragment df = new DetailFragment();
             Bundle args = new Bundle();
-            args.putParcelable(DetailFragment.INTENT_PARCEL, movieItem);
+            args.putParcelable(DetailFragment.MOVIE_PARCEL, movieItem);
+
+            Intent intent = new Intent();
+            intent.putExtra(DetailFragment.INTENT_PARCEL, args);
 
             df.setArguments(args);
             df.setNeedExtraFetch(needExtraFetch);
@@ -142,6 +145,38 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 //            intent.putExtra(DetailFragment.MOVIE_PARCEL, movieItem);
 //            startActivity(intent);
 //        }
+
+/*
+
+Intent intent = new Intent(getActivity(), DetailActivity.class);
+//                            Bundle mParcel = new Bundle();
+//                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
+//
+//                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
+//                            startActivity(intent);
+
+
+           if (mTwoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_ARGUMENT, locationAndDateUri);
+
+            DetailFragment df = new DetailFragment();
+            df.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, df, DETAILFRAGMENT_TAG)
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class)
+                                    .setData(locationAndDateUri);
+            startActivity(intent);
+        }
+    }
+
+
+         */
+
     }
 
 }

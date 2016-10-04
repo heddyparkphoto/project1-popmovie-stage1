@@ -90,9 +90,20 @@ public class DetailFragment extends Fragment {
             Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
             if (bundle.getParcelable(MOVIE_PARCEL) != null) {
                 mMovie = bundle.getParcelable(MOVIE_PARCEL);
+                Log.d(LOG_TAG, "mMovie not null!");
+            } else {
+                Log.d(LOG_TAG, "Bad::::: mMovie is NULL!");
             }
 
            // Log.d(LOG_TAG, "Intent not null!");
+        } else if (null!=intent && getArguments()!= null){
+            Bundle args = getArguments();
+            if (args != null){
+                mMovie = args.getParcelable(DetailFragment.MOVIE_PARCEL);
+                Log.d(LOG_TAG, "getArguments mMovie not null!");
+            } else {
+                Log.d(LOG_TAG, "Bad::getArguments --- mMovie is NULL!");
+            }
         }
 
 //        if (savedInstanceState!=null){
