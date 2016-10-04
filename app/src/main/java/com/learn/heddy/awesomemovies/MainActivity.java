@@ -31,7 +31,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         if (savedInstanceState == null) {
             if (sortOption.equalsIgnoreCase(getString(R.string.favorites))){
                 getSupportFragmentManager().beginTransaction()
-                        .add(R.id.mainactivity_container, new ListFavoriteFragment())
+                        .add(R.id.mainactivity_container, new ListFavoritesFragment())
                         .commit();
             } else {
                 getSupportFragmentManager().beginTransaction()
@@ -72,7 +72,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         super.onResume();
 
         /*
-            If "favorites" sort option, switch to ListFavoriteFragment, if not api call to popular or top_rated.
+            If "favorites" sort option, switch to ListFavoritesFragment, if not api call to popular or top_rated.
          */
         String sort_option = Utility.getPreferredSortOption(this);
 
@@ -93,7 +93,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         } else {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(
-                    R.id.mainactivity_container, new ListFavoriteFragment());
+                    R.id.mainactivity_container, new ListFavoritesFragment());
             transaction.addToBackStack(null);
             transaction.commit();
 

@@ -16,11 +16,11 @@ import java.io.File;
 /**
  * Created by hyeryungpark on 9/19/16.
  */
-public class FavoritePickAdapter extends CursorAdapter {
+public class FavoriteMovieAdapter extends CursorAdapter {
 
-    private static final String LOG_TAG = FavoritePickAdapter.class.getSimpleName();
+    private static final String LOG_TAG = FavoriteMovieAdapter.class.getSimpleName();
 
-    public FavoritePickAdapter(Context context, Cursor c, int flags) {
+    public FavoriteMovieAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
@@ -48,13 +48,13 @@ public class FavoritePickAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        // Use the selection columns defined in the ListFavoriteFragment
-        //ListFavoriteFragment.PICKFAVORITE_COLUMNS
+        // Use the selection columns defined in the ListFavoritesFragment
+        //ListFavoritesFragment.PICKFAVORITE_COLUMNS
 
         FavoriteViewHolder holder = (FavoriteViewHolder)view.getTag();
 
         holder.imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        File posterfile = getFileInInternalStorage(cursor.getString(ListFavoriteFragment.COL_TITLE));
+        File posterfile = getFileInInternalStorage(cursor.getString(ListFavoritesFragment.COL_TITLE));
         if (posterfile != null) {
             Picasso.with(context).load(posterfile).into(holder.imageView);
         } else {

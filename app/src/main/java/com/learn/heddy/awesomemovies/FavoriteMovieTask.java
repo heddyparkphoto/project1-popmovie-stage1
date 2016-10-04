@@ -14,16 +14,16 @@ import com.learn.heddy.awesomemovies.data.MovieContract;
 /**
  * Created by hyeryungpark on 9/23/16.
  */
-public class AddFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
+public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
 
-    static final String LOG_TAG = AddFavoriteMovieTask.class.getSimpleName();
+    static final String LOG_TAG = FavoriteMovieTask.class.getSimpleName();
 
     private final Context mContext;
     private final boolean mIsAdd;
     private final boolean mIsDelete;
     private Movie mMovie;
 
-    public AddFavoriteMovieTask(Context context, boolean isAdd, boolean isDelete) {
+    public FavoriteMovieTask(Context context, boolean isAdd, boolean isDelete) {
 
         Log.v(LOG_TAG, "Add task class constructor..");
         mContext = context;
@@ -44,6 +44,7 @@ public class AddFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
             Cursor c = mContext.getContentResolver().query(queryUri, null, null, null, null);
             if (c.getCount() > 0) {
                 Log.d(LOG_TAG, "Exists in the Database.");
+                return true;
             } else {
 
                 //addToGoodMovieDatabase
@@ -102,7 +103,7 @@ public class AddFavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
                 Toast.makeText(mContext, "Removed from the Favorite Movies!", Toast.LENGTH_LONG).show();
             }
         } else {
-            Toast.makeText(mContext, "AddFavoriteMovieTask failed.", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "FavoriteMovieTask failed.", Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -170,7 +170,7 @@ public class DetailFragment extends Fragment {
         if (needExtraFetch) {
             Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
         } else {
-            mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            //mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             File posterfile = getFileInInternalStorage(mMovie.title);
             if (posterfile != null) {
                 Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
@@ -336,8 +336,8 @@ public class DetailFragment extends Fragment {
             @Override
             public void onClick (View v){
 
-                //AddFavoriteMovieTask asyncAddTask = new AddFavoriteMovieTask(getActivity(), true, false);
-                AddFavoriteMovieTask asyncAddTask = new AddFavoriteMovieTask(getActivity(), isAdd, isRemove);
+                //FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), true, false);
+                FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), isAdd, isRemove);
 
                 asyncAddTask.execute(mMovie);
 

@@ -23,9 +23,9 @@ import com.learn.heddy.awesomemovies.data.MovieContract;
 /**
  * Created by hyeryungpark on 9/19/16.
  */
-public class ListFavoriteFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ListFavoritesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    public static final String LOG_TAG = ListFavoriteFragment.class.getSimpleName();
+    public static final String LOG_TAG = ListFavoritesFragment.class.getSimpleName();
 
     /* Cursor variables */
     static final String[] FAVORITE_COLUMNS = {
@@ -53,9 +53,9 @@ public class ListFavoriteFragment extends Fragment implements LoaderManager.Load
         Loader variables
      */
     private static final int LOADER_ID_FAVORITES = 11;
-    FavoritePickAdapter mAdapter;
+    FavoriteMovieAdapter mAdapter;
 
-    public ListFavoriteFragment() {
+    public ListFavoritesFragment() {
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ListFavoriteFragment extends Fragment implements LoaderManager.Load
         //Get the GridView from the fragment_main.xml so that the adapter can be set on it
         GridView gridView = (GridView)rootView.findViewById(R.id.gridview_movies);
 
-        mAdapter = new FavoritePickAdapter(getActivity(), null, 0);
+        mAdapter = new FavoriteMovieAdapter(getActivity(), null, 0);
         gridView.setAdapter(mAdapter);
 
         gridView.setOnItemClickListener(
