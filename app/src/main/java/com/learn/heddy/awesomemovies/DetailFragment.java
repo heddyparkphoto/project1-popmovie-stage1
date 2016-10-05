@@ -94,9 +94,7 @@ public class DetailFragment extends Fragment {
             } else {
                 Log.d(LOG_TAG, "Bad::::: mMovie is NULL!");
             }
-
-           // Log.d(LOG_TAG, "Intent not null!");
-        } else if (null!=intent && getArguments()!= null){
+        } else if (getArguments()!= null){
             Bundle args = getArguments();
             if (args != null){
                 mMovie = args.getParcelable(DetailFragment.MOVIE_PARCEL);
@@ -203,14 +201,6 @@ public class DetailFragment extends Fragment {
             handleTrailers(rootView);
             handleReviews(rootView);
         }
-//        else {
-//            if (null != mTrailerTitleView) {
-//                mTrailerTitleView.setVisibility(View.INVISIBLE);
-//            }
-//            if (null != mReviewsLinkView) {
-//                mReviewsLinkView.setVisibility(View.INVISIBLE);
-//            }
-//        }
 
         return rootView;
     }
@@ -340,8 +330,6 @@ public class DetailFragment extends Fragment {
             isAdd = true;
             isRemove = false;
         }
-
-        Log.v(LOG_TAG, "In handleMarkFavorites ");
 
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
             @Override

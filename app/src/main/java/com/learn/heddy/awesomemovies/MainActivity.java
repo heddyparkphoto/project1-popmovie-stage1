@@ -114,13 +114,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
     public void OnMainMovieItemClick(Movie movieItem) {
         boolean needExtraFetch = Utility.needExtraFetch(this);
 
-        if (movieItem!=null){
-            Log.d(LOG_TAG, "OnMainMovieItemClick - Movie passed in success.");
-        }
-        else {
-            Log.d(LOG_TAG, "OnMainMovieItemClick- but PASSED IN NULL MOVIE ...");
-        }
-//        if (mTwoPane){
+        if (mTwoPane){
 
             DetailFragment df = new DetailFragment();
             Bundle args = new Bundle();
@@ -137,46 +131,17 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
             transaction.addToBackStack(null);
 
             transaction.commit();
-//        } else {
+        } else {
             /*
                 This snippet replaces what the MovieFragment was doing
              */
-//            Intent intent = new Intent(this, DetailActivity.class);
-//            intent.putExtra(DetailFragment.MOVIE_PARCEL, movieItem);
-//            startActivity(intent);
-//        }
+            Intent intent = new Intent(this, DetailActivity.class);
+            Bundle mParcel = new Bundle();
+            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, movieItem);
 
-/*
-
-Intent intent = new Intent(getActivity(), DetailActivity.class);
-//                            Bundle mParcel = new Bundle();
-//                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
-//
-//                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
-//                            startActivity(intent);
-
-
-           if (mTwoPane) {
-            Bundle args = new Bundle();
-            args.putParcelable(DetailFragment.DETAIL_ARGUMENT, locationAndDateUri);
-
-            DetailFragment df = new DetailFragment();
-            df.setArguments(args);
-
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.weather_detail_container, df, DETAILFRAGMENT_TAG)
-                    .addToBackStack(null)
-                    .commit();
-        } else {
-            Intent intent = new Intent(this, DetailActivity.class)
-                                    .setData(locationAndDateUri);
+            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
             startActivity(intent);
         }
-    }
-
-
-         */
-
     }
 
 }

@@ -1,7 +1,6 @@
 package com.learn.heddy.awesomemovies;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -57,12 +56,13 @@ public class MoviesFragment extends Fragment {
 
                         //Set on Bundle the Parcelable Movie object
                         //Use Explicit Intent for Part 1 project
-                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-                        Bundle mParcel = new Bundle();
-                        mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
-
-                        intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
-                        startActivity(intent);
+//                        Intent intent = new Intent(getActivity(), DetailActivity.class);
+//                        Bundle mParcel = new Bundle();
+//                        mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
+//
+//                        intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
+//                        startActivity(intent);
+                        ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
                     }
                 }
         );
