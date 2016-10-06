@@ -51,12 +51,6 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
                     .appendEncodedPath(params[1])
                     .appendQueryParameter("api_key", BuildConfig.THE_MOVIE_DB_API_KEY);
 
-//            Uri builtUri = Uri.parse(MOVIES_API_BASE_URL).buildUpon()
-//                    .appendEncodedPath(params[0])
-//                    .appendEncodedPath(params[1])
-//                    .appendQueryParameter(MY_KEY_PARAM, MY_KEY)
-//                    .build();
-
             URL url;
             url = new URL(builder.build().toString());
 
@@ -164,7 +158,7 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
                     fullcontent = "";
                 }
 
-                returnList.add(fullcontent + " Author: "+author); //further parse once I learn what to do with the database and files
+                returnList.add(fullcontent + "\nAuthor: "+author); //further parse once I learn what to do with the database and files
             }
         } else {
             Log.e(LOG_TAG, "Unknown request: only videos or reviews allowed.");

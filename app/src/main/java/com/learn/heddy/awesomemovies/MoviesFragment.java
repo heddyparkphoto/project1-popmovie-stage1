@@ -102,7 +102,5 @@ public class MoviesFragment extends Fragment {
     public interface OnMainMovieItemSelectedListener {
 
         public void OnMainMovieItemClick(Movie movieItem);
-
-
     }
 }

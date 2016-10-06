@@ -40,12 +40,8 @@
 
         <activity
             android:name=".ReviewsActivity"
-            android:label="@string/title_activity_detail"
-            android:parentActivityName=".DetailActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".DetailActivity" />
-        </activity>
+            android:label="@string/title_activity_reviews"
+            />
 
         <provider
             android:authorities="com.learn.heddy.awesomemovies"

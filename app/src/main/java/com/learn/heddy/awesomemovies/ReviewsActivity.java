@@ -8,7 +8,6 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -18,11 +17,10 @@ import java.util.ArrayList;
 public class ReviewsActivity extends ActionBarActivity {
 
     static final String LOG_TAG = ReviewsActivity.class.getSimpleName();
-
-    Movie mMovie;
     ArrayAdapter<String> mReviewsAdapter;
 
     static private ArrayList<String> reviewApiResult;     // reviews api result collection
+    private Movie mMovie;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,28 +37,23 @@ public class ReviewsActivity extends ActionBarActivity {
                 }
             }
 
-            if (null == mMovie) {
-                Log.e(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
-                //return;
+            if (mMovie!=null) {
+                // Show Movie Title
+                TextView titleView = (TextView) findViewById(R.id.reviews_title);
+                String moreTitle = titleView.getText() + "   " + mMovie.title;
+                titleView.setText(moreTitle);
+
+                // Set up for reviews list section
+                ListView reviewsList = (ListView) findViewById(R.id.listview_reviews);
+                mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item); //layout not the view
+                reviewsList.setAdapter(mReviewsAdapter);
+                handleReviewsView();
             }
-
-            // Show Movie Title
-            TextView titleView = (TextView) findViewById(R.id.reviews_title);
-            String moreTitle = titleView.getText() + "   " + mMovie.title;
-            titleView.setText(moreTitle);
-
-            // Set up for reviews list section
-            ListView reviewsList = (ListView) findViewById(R.id.listview_reviews);
-            mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item); //layout not the view
-            reviewsList.setAdapter(mReviewsAdapter);
-            //Toast.makeText(this, "Review Activity yo!", Toast.LENGTH_LONG).show();
-            handleReviewsView();
         }
     }
 
     private void handleReviewsView() {
 
-        Toast.makeText(this, "Review Activity fetching reviews!", Toast.LENGTH_LONG).show();
         String[] result;
         FetchMovieExtras myfetch;
 
@@ -78,7 +71,6 @@ public class ReviewsActivity extends ActionBarActivity {
                 for (String s: reviewApiResult){
                     mReviewsAdapter.add(s);
                 }
-
             } else {
                 Log.v(LOG_TAG, " reviewApiResult is null still!");
             }
@@ -88,4 +80,5 @@ public class ReviewsActivity extends ActionBarActivity {
         }
 
     }
+
 }

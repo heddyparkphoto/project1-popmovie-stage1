@@ -3,6 +3,7 @@ package com.learn.heddy.awesomemovies;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -36,6 +37,7 @@ public class DetailFragment extends Fragment {
 
     public static final String INTENT_PARCEL = "INTENT_PARCEL";
     public static final String MOVIE_PARCEL = "MOVIE_PARCEL";
+    private static final String TEST_INT = "TEST_INT";
 
     private Movie mMovie;
     private ImageView mPosterImageView;
@@ -84,15 +86,19 @@ public class DetailFragment extends Fragment {
         mTrailerTitleView = (TextView) rootView.findViewById(R.id.trailer_title);
         mReviewsLinkView = (TextView) rootView.findViewById(R.id.readReviewsLink);
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(TEST_INT)){
+            Log.v(LOG_TAG, "well, i'll be ...");
+        }
+
         Intent intent = getActivity().getIntent();
 
         if (null != intent && null != intent.getBundleExtra(INTENT_PARCEL)) {
             Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
             if (bundle.getParcelable(MOVIE_PARCEL) != null) {
                 mMovie = bundle.getParcelable(MOVIE_PARCEL);
-                Log.d(LOG_TAG, "mMovie not null!");
+                Log.d(LOG_TAG, "Intent MOVIE_PARCEL not null!");
             } else {
-                Log.d(LOG_TAG, "Bad::::: mMovie is NULL!");
+                Log.d(LOG_TAG, "Bad::::: MOVIE_PARCEL is NULL!");
             }
         } else if (getArguments()!= null){
             Bundle args = getArguments();
@@ -317,6 +323,7 @@ public class DetailFragment extends Fragment {
         if (!needExtraFetch) {
             //mFavoriteButtonView.setVisibility(View.INVISIBLE);
             mFavoriteButtonView.setText("Remove");
+            mFavoriteButtonView.setBackgroundColor(Color.LTGRAY);
             isAdd = false;
             isRemove = true;
 
@@ -346,19 +353,6 @@ public class DetailFragment extends Fragment {
         });
 
         Log.v(LOG_TAG, " Good so far?? ");
-    }
-
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-        if (mMovie!=null){
-            outState.putParcelable(MOVIE_PARCEL, mMovie);
-            Log.d(LOG_TAG, "onSaveInstanceState - saving my movie");
-        } else {
-            Log.d(LOG_TAG, "onSaveInstanceState - mMovie is null....");
-        }
-        super.onSaveInstanceState(outState);
     }
 
     public void onSortOptionChanged(String newMovieId){

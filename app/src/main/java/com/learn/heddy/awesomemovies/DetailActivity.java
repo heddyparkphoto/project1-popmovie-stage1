@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 
 /**
  * Created by hyeryungpark on 8/27/16.
@@ -27,6 +28,7 @@ public class DetailActivity extends ActionBarActivity {
                     mm = bundle.getParcelable(DetailFragment.MOVIE_PARCEL);
                 } else {
                     // message?
+                    Log.v(LOG_TAG, "in else...");
                 }
             }
 
@@ -40,5 +42,4 @@ public class DetailActivity extends ActionBarActivity {
                     .commit();
         }
     }
-
 }

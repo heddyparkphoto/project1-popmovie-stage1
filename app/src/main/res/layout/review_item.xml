@@ -4,6 +4,6 @@
     android:layout_height="wrap_content"
     android:id="@+id/review_name"
     android:text="@string/reviewsList"
-    android:textAppearance="?android:attr/textAppearanceSmall"
+    android:textAppearance="?android:attr/textAppearanceMedium"
 
     />
