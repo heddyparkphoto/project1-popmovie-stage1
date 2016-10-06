@@ -21,4 +21,6 @@
     <string name="reviews">Reviews:</string>
     <string name="reviewsList">Reviews:</string>
     <string name="title_activity_reviews">Read Reviews</string>
+    <string name="markFavorite">Mark As Favorite</string>
+    <string name="action_share">Share</string>
 </resources>

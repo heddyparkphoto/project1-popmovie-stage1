@@ -9,8 +9,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -37,7 +42,6 @@ public class DetailFragment extends Fragment {
 
     public static final String INTENT_PARCEL = "INTENT_PARCEL";
     public static final String MOVIE_PARCEL = "MOVIE_PARCEL";
-    private static final String TEST_INT = "TEST_INT";
 
     private Movie mMovie;
     private ImageView mPosterImageView;
@@ -48,13 +52,9 @@ public class DetailFragment extends Fragment {
     private TextView mReviewsLinkView;
     private Button mFavoriteButtonView;
     private TextView mTrailerTitleView;
-    private TextView mRequestReviewLinkView;
 
-
-
-    //Trailers and Reviews Array
+    //Trailers ArrayAdapter
     ArrayAdapter<String> mTrailersAdapter; //trailers are another JSONARRAY, so for now, test with a string -just concat couple fields as String
-    //ArrayAdapter<String> mReviewsAdapter;
 
     // Flag to make extra api calls for trailers and reviews
     private boolean needExtraFetch;
@@ -64,13 +64,38 @@ public class DetailFragment extends Fragment {
 
     ArrayList<String> mTrailerKeyArrayList;
     static private ArrayList<String> trailerApiResult;    // trailers api result collection
-    static private ArrayList<String> reviewApiResult;     // reviews api result collection
 
     private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
+    private final static String SHARE_ACTION_HASHTAG = "#AwesomeMoviesApp";
+    private String mShareActionTrailerUri;
+    ShareActionProvider mShareActionProvider;
 
     public DetailFragment() {
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+        if (Utility.getPreferredSortOption(getActivity()) != getString(R.string.favorites)) {
+            // Inflate the menu; this adds items to the action bar if it is present.
+            inflater.inflate(R.menu.detailfragment, menu);
+            MenuItem shareItem = menu.findItem(R.id.action_share);
+
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat
+                    .getActionProvider(shareItem);
+
+            if (mShareActionProvider != null) {
+                // New condition during CursorLoader.Callbacks implmentation - Cursor can also set this text
+                if (mShareActionTrailerUri != null) {
+                    mShareActionProvider.setShareIntent(createMoviesShareIntent());
+                } else {
+                    // Warn that the Share Action Provider was null
+                    Log.d(LOG_TAG, "Share Action Provider was null....");
+                }
+            }
+        }
     }
 
     @Nullable
@@ -85,10 +110,6 @@ public class DetailFragment extends Fragment {
         mReleaseDateView = (TextView) rootView.findViewById(R.id.releaseDateText);
         mTrailerTitleView = (TextView) rootView.findViewById(R.id.trailer_title);
         mReviewsLinkView = (TextView) rootView.findViewById(R.id.readReviewsLink);
-
-        if (savedInstanceState != null && savedInstanceState.containsKey(TEST_INT)){
-            Log.v(LOG_TAG, "well, i'll be ...");
-        }
 
         Intent intent = getActivity().getIntent();
 
@@ -231,7 +252,6 @@ public class DetailFragment extends Fragment {
         videoParams[1] = "videos";
 
         myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(videoParams);
-        // testnamesResult = myfetch.trailersName; // trailerName was blank
 
         try {
             trailerApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
@@ -250,9 +270,13 @@ public class DetailFragment extends Fragment {
                     mTrailersAdapter.add(s.substring(delimPos + 1));
                 }
 
-//                    if (trailerApiResult != null && trailerApiResult.size() > 0) {
-//                        mSharedTrailerUri = testnamesResult.get(0);
-//                    }
+                if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > 0) {
+                    mShareActionTrailerUri = mTrailerKeyArrayList.get(0);
+
+                    if (mShareActionProvider != null) {
+                        mShareActionProvider.setShareIntent(createMoviesShareIntent());
+                    }
+                }
             } else {
         //        Log.v(LOG_TAG, " trailerApiResult is null still!");
             }
@@ -414,4 +438,18 @@ public class DetailFragment extends Fragment {
             }
         }
     };
+
+    private Intent createMoviesShareIntent(){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        String shareString = "";
+
+        if (mShareActionTrailerUri!=null){
+            shareString = String.format("%s%s", mShareActionTrailerUri, SHARE_ACTION_HASHTAG);
+        }
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, shareString);
+
+        return intent;
+    }
 }
