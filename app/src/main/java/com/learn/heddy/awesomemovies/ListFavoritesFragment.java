@@ -27,7 +27,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     public static final String LOG_TAG = ListFavoritesFragment.class.getSimpleName();
 
     /* Cursor variables */
-    static final String[] FAVORITE_COLUMNS = {
+    public static final String[] FAVORITE_COLUMNS = {
             MovieContract.MovieEntry._ID,
             MovieContract.MovieEntry.COLUMN_ID,
             MovieContract.MovieEntry.COLUMN_POSTERPATH,
@@ -40,19 +40,20 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     /* These indices are tied to PICKFAVORITE_COLUMNS.  If PICKFAVORITE_COLUMNS changes, these
        must change.
     */
-    static final int COL_ID = 0;  //INTEGER
-    static final int COL_MOVIE_ID = 1;  //INTEGER
-    static final int COL_POSTER_FILE_PATH = 2; //TEXT
-    static final int COL_TITLE = 3; //TEXT
-    static final int COL_OVERVIEW = 4; //TEXT
-    static final int COL_RATING = 5; //REAL
-    static final int COL_RELEASEDATE = 6; //INTEGER
+    public static final int COL_ID = 0;  //INTEGER
+    public static final int COL_MOVIE_ID = 1;  //INTEGER
+    public static final int COL_POSTER_FILE_PATH = 2; //TEXT
+    public static final int COL_TITLE = 3; //TEXT
+    public static final int COL_OVERVIEW = 4; //TEXT
+    public static final int COL_RATING = 5; //REAL
+    public static final int COL_RELEASEDATE = 6; //INTEGER
 
     /* ****
         Loader variables
      */
     private static final int LOADER_ID_FAVORITES = 11;
     FavoriteMovieAdapter mAdapter;
+    Movie mm;
 
     public ListFavoritesFragment() {
     }
@@ -65,6 +66,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(LOADER_ID_FAVORITES, null, this);
+        Log.d(LOG_TAG, "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -77,7 +79,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
-
+        Log.d(LOG_TAG, "onCreateView");
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);// Populate the main screen with Favorite movies
 
         //Get the GridView from the fragment_main.xml so that the adapter can be set on it
@@ -95,7 +97,8 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
                         Cursor itemCursor = (Cursor) adapterView.getItemAtPosition(position);
                         if (null!=itemCursor) {
                             //itemCursor is that a Movie?  may need to Serialize into an Object
-                            Movie mm = new Movie();
+                            //Movie mm = new Movie();
+                            mm = new Movie();
                             mm.id = Integer.toString(itemCursor.getInt(COL_MOVIE_ID));
                             mm.posterpath = itemCursor.getString(COL_POSTER_FILE_PATH);
                             mm.title = itemCursor.getString(COL_TITLE);
@@ -129,7 +132,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
         mPosition = savedInstanceState.getInt(ARG_POSITION_KEY);
         }
 */
-        Log.d(LOG_TAG, "existing onCreateView");
+        Log.d(LOG_TAG, "EXITing onCreateView");
 
         return rootView;
     }
@@ -172,9 +175,8 @@ public void onSaveInstanceState(Bundle outState) {
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(LOG_TAG, "in onLoadFinished");
         mAdapter.swapCursor(data);
-        //we'll add smooth scroll later here...
-        Log.d(LOG_TAG, "existing onLoadFinished");
     }
 
     @Override
@@ -187,6 +189,12 @@ public void onSaveInstanceState(Bundle outState) {
         Log.d(LOG_TAG, "onPause");
         super.onPause();
         // Another activity is taking focus (this activity is about to be "paused").
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(LOG_TAG, "onStart");
     }
 
     @Override
@@ -205,15 +213,5 @@ public void onSaveInstanceState(Bundle outState) {
     public void onResume() {
         Log.d(LOG_TAG, "onResume");
         super.onResume();
-    }
-
-    /*
-    Movie DetailFragment Callback for when an item has been selected.
- */
-    public interface OnFavoriteMovieItemSelectedListener {
-
-        public void OnFavoriteMovieItemClick(Uri favoriteDetailUri);
-
-
     }
 }

@@ -8,25 +8,20 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity implements MoviesFragment.OnMainMovieItemSelectedListener {
+public class MainActivity extends ActionBarActivity implements MoviesFragment.OnMainMovieItemSelectedListener
+{
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DETAILFRAGMENT";
+
     public boolean mTwoPane;
+    private String mSortOption;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        String sortOption = Utility.getPreferredSortOption(this);
-
-//        if (savedInstanceState == null){
-//            getSupportFragmentManager().beginTransaction()
-//                    .add(R.id.mainactivity_container, new MoviesFragment())
-//                    .commit();
-//         }
+        mSortOption = Utility.getPreferredSortOption(this);
 
         if (findViewById(R.id.detailcontainer) != null){
             mTwoPane = true;
@@ -39,7 +34,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         }
 
         if (savedInstanceState == null) {
-            if (sortOption.equalsIgnoreCase(getString(R.string.favorites))){
+            if (mSortOption.equalsIgnoreCase(getString(R.string.favorites))){
                 getSupportFragmentManager().beginTransaction()
                         .add(R.id.mainactivity_container, new ListFavoritesFragment())
                         .commit();
@@ -49,7 +44,6 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
                         .commit();
             }
         }
-
     }
 
     @Override
@@ -81,38 +75,65 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         Log.d(LOG_TAG, "onResume");
         super.onResume();
 
-        /*
-            If "favorites" sort option, switch to ListFavoritesFragment, if not api call to popular or top_rated.
-         */
         String sort_option = Utility.getPreferredSortOption(this);
+        if (sort_option!=null && sort_option.compareTo(mSortOption)!= 0) {
 
-        /*
-            Set up for future DetailFragment UI update
-         */
-        DetailFragment df = (DetailFragment)getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
-        if (df != null){
-            df.onSortOptionChanged("new sort movie!"); //Just test for now.
-        }
+            if (getString(R.string.favorites).compareToIgnoreCase(sort_option) != 0) {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(
+                        R.id.mainactivity_container, new MoviesFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
 
-        if (getString(R.string.favorites).compareToIgnoreCase(sort_option) != 0) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(
-                    R.id.mainactivity_container, new MoviesFragment());
-            transaction.addToBackStack(null);
-            transaction.commit();
-        } else {
+            } else {
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(
+                        R.id.mainactivity_container, new ListFavoritesFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+
+            /*
+                DetailFragment UI update if Tablet
+             */
+            if (mTwoPane) {
+                DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+                if (df != null) {
+                    //df.onSortOptionChanged(sort_option); //Just test for now.
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.detailcontainer, df, DETAILFRAGMENT_TAG)
+                            .commit();
+                }
+            }
+        } else if (getString(R.string.favorites).compareToIgnoreCase(sort_option) == 0) {
+            // Always update
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(
                     R.id.mainactivity_container, new ListFavoritesFragment());
             transaction.addToBackStack(null);
             transaction.commit();
 
+//            if (mTwoPane) {
+//                DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+//                if (df != null) {
+//                    //df.onSortOptionChanged(sort_option); //Just test for now.
+//                    getSupportFragmentManager().beginTransaction()
+//                            .replace(R.id.detailcontainer, df, DETAILFRAGMENT_TAG)
+//                            .commit();
+//                }
+//            }
+
         }
+        // Always update
+        mSortOption = sort_option;
+
     }
 
     @Override
     public void OnMainMovieItemClick(Movie movieItem) {
         boolean needExtraFetch = Utility.needExtraFetch(this);
+        if (movieItem!=null) Log.v(LOG_TAG, "OnMainMovieItemClick");
+        else Log.v(LOG_TAG, "OnMainMovieItemClick - NULL!!!");
 
         if (mTwoPane){
 
@@ -143,5 +164,44 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
             startActivity(intent);
         }
     }
-
+//
+//
+//
+//    @Override
+//    public void OnDetailRefresh(DetailActivity da) {
+//        Log.v(LOG_TAG, "MainActivity can do...");
+//    }
+//
+//    @Override
+//    public void onChangeDetailFragment(Movie movieItem) {
+//        if (movieItem!=null){
+//            Log.v(LOG_TAG, "onChangeDetailFragment");
+//        } else{
+//            Log.v(LOG_TAG, "onChangeDetailFragment movieItem was NULL");
+//        }
+//
+//        if (mTwoPane){
+//
+//            boolean needExtraFetch = Utility.needExtraFetch(this);
+//
+//            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+//
+//            df = new DetailFragment();
+//
+//            Bundle args = new Bundle();
+//            args.putParcelable(DetailFragment.MOVIE_PARCEL, movieItem);
+//
+//            Intent intent = new Intent();
+//            intent.putExtra(DetailFragment.INTENT_PARCEL, args);
+//
+//            df.setArguments(args);
+//            df.setNeedExtraFetch(needExtraFetch);
+//
+//            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//            transaction.replace(R.id.detailcontainer, df);
+//            transaction.addToBackStack(null);
+//
+//            //transaction.commit();
+//        }
+//    }
 }

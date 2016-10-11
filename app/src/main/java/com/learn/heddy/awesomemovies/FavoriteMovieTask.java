@@ -75,7 +75,7 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
             }
 
             return newRowId != -1;
-        } else if (mIsDelete){
+        } else if (mIsDelete) {
             int deletedNum = 0;
             final String sMovieByMovieIdSelection =
                     MovieContract.MovieEntry.TABLE_MOVIE +
@@ -87,7 +87,8 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
                     new String[]{mMovie.id}
             );
 
-            return deletedNum!=0;
+            return deletedNum != 0;
+
         } else {
             return true;
         }
@@ -98,9 +99,9 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     protected void onPostExecute(Boolean success) {
         if (success){
             if (mIsAdd) {
-                Toast.makeText(mContext, "Added to Favorite Movie Collection!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Added to Favorite Movie Collection!", Toast.LENGTH_SHORT).show();
             } else if (mIsDelete){
-                Toast.makeText(mContext, "Removed from the Favorite Movies!", Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, "Removed from the Favorite Movies!", Toast.LENGTH_SHORT).show();
             }
         } else {
             Toast.makeText(mContext, "FavoriteMovieTask failed.", Toast.LENGTH_LONG).show();

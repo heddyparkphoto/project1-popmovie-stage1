@@ -2,6 +2,7 @@ package com.learn.heddy.awesomemovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -32,6 +33,8 @@ import com.squareup.picasso.Target;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.*;
 
 /**
  * Created by hyeryungpark on 9/15/16.
@@ -131,102 +134,108 @@ public class DetailFragment extends Fragment {
             }
         }
 
-//        if (savedInstanceState!=null){
-//            if (savedInstanceState.getParcelable(MOVIE_PARCEL)!=null){
-//                mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
-//            }
-//
-//            Log.d(LOG_TAG, "savedInstanceState not null");
-//        }
-
         if (null == mMovie) {
-         //   Log.e(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
-            return rootView;
+            Log.d(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
+
+            try {
+                // InitialLoad load with the Favorites database with the highest rating among them
+                FavoriteDefaultMovieTask asyncTask = new FavoriteDefaultMovieTask(getActivity());
+                Cursor data = asyncTask.execute().get();
+                Log.d(LOG_TAG, "fetch executed....");
+                mMovie = new Movie();
+                mMovie.id = Integer.toString(data.getInt(COL_MOVIE_ID));
+                mMovie.posterpath = data.getString(COL_POSTER_FILE_PATH);
+                mMovie.title = data.getString(COL_TITLE);
+                mMovie.overview = data.getString(COL_OVERVIEW);
+                mMovie.rating = data.getString(COL_RATING);
+                mMovie.releasedate = data.getString(COL_RELEASEDATE);
+
+                // Save the poster image to a File system to save space in the Database
+                Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
+                // ((OnDetailRefreshListener)getActivity()).OnDetailRefresh(new DetailActivity());
+            } catch (Exception allEx){
+                // message??
+                Log.e(LOG_TAG, allEx.toString());
+            }
+        } else if (savedInstanceState!=null){
+            //if (!needExtraFetch) {
+                    if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
+                        mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
+                    }
+          //  }
         }
 
-        // Set up for trailers list section
-        ListView trailersList = (ListView) rootView.findViewById(R.id.listview_trailer);
-        mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item); //layout not the view
-        trailersList.setAdapter(mTrailersAdapter);
 
-        trailersList.setOnItemClickListener(
-                new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        String urlAsString = "";
-                        //String keyName = mTrailersAdapter.getItem(position);
-                        //int delimPos = keyName.indexOf(Utility.getTrailerDelimeter());
-                        if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > position) {
-                            //     String urlAsString = keyName.substring(0, delimPos);
-                            urlAsString = mTrailerKeyArrayList.get(position);
+        if (mMovie!=null) {
 
-                            //Log.d(LOG_TAG, "whole " + keyName + " trailer key " + urlAsString);
+            // Set up for trailers list section
+            ListView trailersList = (ListView) rootView.findViewById(R.id.listview_trailer);
+            mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item); //layout not the view
+            trailersList.setAdapter(mTrailersAdapter);
 
-                            Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
-                                    .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
-                                    .build();
-                            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                                startActivity(intent);
-                            } else {
-                                //Display error message
-                                Toast.makeText(getActivity(), "Sorry, cannot play video", Toast.LENGTH_LONG).show();
+            trailersList.setOnItemClickListener(
+                    new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            String urlAsString = "";
+                            //String keyName = mTrailersAdapter.getItem(position);
+                            //int delimPos = keyName.indexOf(Utility.getTrailerDelimeter());
+                            if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > position) {
+                                //     String urlAsString = keyName.substring(0, delimPos);
+                                urlAsString = mTrailerKeyArrayList.get(position);
+
+                                //Log.d(LOG_TAG, "whole " + keyName + " trailer key " + urlAsString);
+
+                                Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
+                                        .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
+                                        .build();
+                                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                                    startActivity(intent);
+                                } else {
+                                    //Display error message
+                                    Toast.makeText(getActivity(), "Sorry, cannot play video", Toast.LENGTH_LONG).show();
+                                }
                             }
                         }
                     }
-                }
-        );
+            );
 
-//        // Set up for reviews list section
-//        ListView reviewsList = (ListView)rootView.findViewById(R.id.listview_reviews);
-//        mReviewsAdapter = new ArrayAdapter<String>(getActivity(), R.layout.review_item); //layout not the view
-//        reviewsList.setAdapter(mReviewsAdapter);
-//
-        // TRY HERE then move to Utility class
-        // Preference sort option from SharedPreferences
-//        String prefSortOption;
-//
-//        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-//        prefSortOption = sharedPreferences.getString(
-//                getString(R.string.pref_sort_by_key), getString(R.string.pref_default_sort_by));
-//
-//        if ("favorites" != prefSortOption){
-//            setNeedExtraFetch(true);
-//        }
-        setNeedExtraFetch(Utility.needExtraFetch(getActivity()));
+            setNeedExtraFetch(Utility.needExtraFetch(getActivity()));
 
-        // Set up basic Detail Fragment
-        String posterpath = mMovie.posterpath;
+            // Set up basic Detail Fragment
+            String posterpath = mMovie.posterpath;
 
         /*
          2 ways of getting the poster depending on the Preference settings
          If needExtraFetch, poster's coming in from real-time online,
          if not, poster's coming from file saved in memory using movie title as file name.
         */
-        if (needExtraFetch) {
-            Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
-        } else {
-            //mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            File posterfile = getFileInInternalStorage(mMovie.title);
-            if (posterfile != null) {
-                Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
+            if (needExtraFetch) {
+                Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
             } else {
-                Log.e(LOG_TAG, "Image for poster not found.");
+                //mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                File posterfile = getFileInInternalStorage(mMovie.title);
+                if (posterfile != null) {
+                    Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
+                } else {
+                    Log.e(LOG_TAG, "Image for poster not found.");
+                }
             }
-        }
 
-        mTitleView.setText(mMovie.title);
-        mSynopsisPlotView.setText(mMovie.overview);
-        mReleaseDateView.setText(mMovie.releasedate);
-        mRatingView.setText(mMovie.rating);
+            mTitleView.setText(mMovie.title);
+            mSynopsisPlotView.setText(mMovie.overview);
+            mReleaseDateView.setText(mMovie.releasedate);
+            mRatingView.setText(mMovie.rating);
 
-        // Set up Action Button
-        handleMarkFavorites(rootView);
+            // Set up Action Button
+            handleMarkFavorites(rootView);
 
-        if (needExtraFetch) {
+            if (needExtraFetch) {
 
-            handleTrailers(rootView);
-            handleReviews(rootView);
+                handleTrailers(rootView);
+                handleReviews(rootView);
+            }
         }
 
         return rootView;
@@ -363,25 +372,25 @@ public class DetailFragment extends Fragment {
         }
 
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick (View v){
-
+                final Boolean inResult;
                 //FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), true, false);
                 FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), isAdd, isRemove);
+                try {
+                    inResult = asyncAddTask.execute(mMovie).get();
 
-                asyncAddTask.execute(mMovie);
+                    // Save the poster image to a File system to save space in the Database
+                    Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
+                } catch (Exception allEx){
+                    Log.e(LOG_TAG, allEx.toString());
+                } finally {
+                    Log.v(LOG_TAG, "finally Good so far?? ");
+                }
 
-                // Save the poster image to a File system to save space in the Database
-                Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
             }
         });
-
-        Log.v(LOG_TAG, " Good so far?? ");
-    }
-
-    public void onSortOptionChanged(String newMovieId){
-        // For now just log it
-        Log.d(LOG_TAG, "newMovieId "+newMovieId);
     }
 
         /*
@@ -452,4 +461,45 @@ public class DetailFragment extends Fragment {
 
         return intent;
     }
+
+    public void onSortOptionChanged(String newMovieId){
+        // For now just log it
+        Log.d(LOG_TAG, "newMovieId "+ newMovieId);
+        //((OnDetailRefreshListener)new MoviesFragment()).OnDetailRefresh(new DetailActivity());
+    }
+
+   /*
+            NOT HAVING TO SAVE THE mMovie for the Non-Favorite paths
+            MovieFragment is saving the mm so that it does not overlay when rotated.
+     */
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        //if (!needExtraFetch) {
+            if (mMovie != null) {
+                Log.v(LOG_TAG, "onSaveInstanceState");
+                outState.putParcelable(MOVIE_PARCEL, mMovie);
+            }
+     //   }
+
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+       // if (!needExtraFetch) {
+            if (savedInstanceState != null) {
+                if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
+                    Log.v(LOG_TAG, "onViewStateRestored");
+                    mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
+                }
+        //    }
+        }
+        Log.v(LOG_TAG, "onViewStateRestored");
+
+    }
+
+
 }
