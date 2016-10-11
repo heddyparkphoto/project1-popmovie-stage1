@@ -342,6 +342,11 @@ public class DetailFragment extends Fragment {
 
                 // Save the poster image to a File system to save space in the Database
                 Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
+
+                // Update the Detail fragment when removed from the Favorites collection
+                if (isRemove){
+                    ((RemovedNotificationListener)getActivity()).OnRemovedItem();
+                }
             }
         });
     }
@@ -409,6 +414,13 @@ public class DetailFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_TEXT, shareString);
 
         return intent;
+    }
+
+    /*
+        When in Two-pane mode, remove the Removed collection and update with the Default movie in Favorites collection
+     */
+    public interface RemovedNotificationListener {
+        public void OnRemovedItem();
     }
 
    /*

@@ -8,7 +8,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class MainActivity extends ActionBarActivity implements MoviesFragment.OnMainMovieItemSelectedListener
+public class MainActivity extends ActionBarActivity implements MoviesFragment.OnMainMovieItemSelectedListener,
+                                                                DetailFragment.RemovedNotificationListener
 {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -151,4 +152,16 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
         }
     }
 
+    @Override
+    public void OnRemovedItem() {
+
+        if (mTwoPane){
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (df != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.detailcontainer, df, DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+        }
+    }
 }
