@@ -136,38 +136,38 @@ public class DetailFragment extends Fragment {
 
         if (null == mMovie) {
             Log.d(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
+            // Are we in the first screen of Favorites option?
+            String sort_option = Utility.getPreferredSortOption(getActivity());
+            if (getString(R.string.favorites).compareTo(sort_option)==0) {
+                try {
+                    // InitialLoad load with the Favorites database with the highest rating among them
+                    FavoriteDefaultMovieTask asyncTask = new FavoriteDefaultMovieTask(getActivity());
+                    Cursor data = asyncTask.execute().get();
+                    Log.d(LOG_TAG, "fetch executed....");
+                    mMovie = new Movie();
+                    mMovie.id = Integer.toString(data.getInt(COL_MOVIE_ID));
+                    mMovie.posterpath = data.getString(COL_POSTER_FILE_PATH);
+                    mMovie.title = data.getString(COL_TITLE);
+                    mMovie.overview = data.getString(COL_OVERVIEW);
+                    mMovie.rating = data.getString(COL_RATING);
+                    mMovie.releasedate = data.getString(COL_RELEASEDATE);
 
-            try {
-                // InitialLoad load with the Favorites database with the highest rating among them
-                FavoriteDefaultMovieTask asyncTask = new FavoriteDefaultMovieTask(getActivity());
-                Cursor data = asyncTask.execute().get();
-                Log.d(LOG_TAG, "fetch executed....");
-                mMovie = new Movie();
-                mMovie.id = Integer.toString(data.getInt(COL_MOVIE_ID));
-                mMovie.posterpath = data.getString(COL_POSTER_FILE_PATH);
-                mMovie.title = data.getString(COL_TITLE);
-                mMovie.overview = data.getString(COL_OVERVIEW);
-                mMovie.rating = data.getString(COL_RATING);
-                mMovie.releasedate = data.getString(COL_RELEASEDATE);
-
-                // Save the poster image to a File system to save space in the Database
-                Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
-                // ((OnDetailRefreshListener)getActivity()).OnDetailRefresh(new DetailActivity());
-            } catch (Exception allEx){
-                // message??
-                Log.e(LOG_TAG, allEx.toString());
+                    // Save the poster image to a File system to save space in the Database
+                    Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
+                    // ((OnDetailRefreshListener)getActivity()).OnDetailRefresh(new DetailActivity());
+                } catch (Exception allEx) {
+                    // Failed retrieving the data
+                    Log.e(LOG_TAG, allEx.toString());
+                }
             }
         } else if (savedInstanceState!=null){
-            //if (!needExtraFetch) {
-                    if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
-                        mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
-                    }
-          //  }
+            if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
+                Log.d(LOG_TAG, "MOVIE_PARCEL on the savedInstanceState");
+                mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
+            }
         }
 
-
         if (mMovie!=null) {
-
             // Set up for trailers list section
             ListView trailersList = (ListView) rootView.findViewById(R.id.listview_trailer);
             mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item); //layout not the view
@@ -178,13 +178,9 @@ public class DetailFragment extends Fragment {
                         @Override
                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                             String urlAsString = "";
-                            //String keyName = mTrailersAdapter.getItem(position);
-                            //int delimPos = keyName.indexOf(Utility.getTrailerDelimeter());
                             if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > position) {
-                                //     String urlAsString = keyName.substring(0, delimPos);
-                                urlAsString = mTrailerKeyArrayList.get(position);
 
-                                //Log.d(LOG_TAG, "whole " + keyName + " trailer key " + urlAsString);
+                                urlAsString = mTrailerKeyArrayList.get(position);
 
                                 Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
                                         .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
@@ -203,18 +199,17 @@ public class DetailFragment extends Fragment {
 
             setNeedExtraFetch(Utility.needExtraFetch(getActivity()));
 
-            // Set up basic Detail Fragment
+            // Populate Detail Fragment
             String posterpath = mMovie.posterpath;
 
-        /*
-         2 ways of getting the poster depending on the Preference settings
-         If needExtraFetch, poster's coming in from real-time online,
-         if not, poster's coming from file saved in memory using movie title as file name.
-        */
+            /* load Poster image;
+             there are 2 ways of getting the poster depending on the Preference settings
+             If needExtraFetch, poster's coming in from real-time online,
+             if not, poster's coming from file saved in memory using movie title as file name.
+            */
             if (needExtraFetch) {
                 Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
             } else {
-                //mPosterImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 File posterfile = getFileInInternalStorage(mMovie.title);
                 if (posterfile != null) {
                     Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
@@ -223,16 +218,17 @@ public class DetailFragment extends Fragment {
                 }
             }
 
+            // Populate more Details
             mTitleView.setText(mMovie.title);
             mSynopsisPlotView.setText(mMovie.overview);
             mReleaseDateView.setText(mMovie.releasedate);
             mRatingView.setText(mMovie.rating);
 
-            // Set up Action Button
+            // Set up Favorite Action Button
             handleMarkFavorites(rootView);
 
+            // Set up Trailers and Reviews if we need movie api calls
             if (needExtraFetch) {
-
                 handleTrailers(rootView);
                 handleReviews(rootView);
             }
@@ -266,7 +262,6 @@ public class DetailFragment extends Fragment {
             trailerApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
             if (null != trailerApiResult) {
                 int tSize = trailerApiResult.size();
-              //  Log.v(LOG_TAG, " testnamesResult length from async " + trailerApiResult.size());
 
                 mTrailerKeyArrayList = new ArrayList<String>(tSize);
 
@@ -287,16 +282,15 @@ public class DetailFragment extends Fragment {
                     }
                 }
             } else {
-        //        Log.v(LOG_TAG, " trailerApiResult is null still!");
+                Log.v(LOG_TAG, " trailerApiResult is null!");
             }
-
         } catch (Exception allEx) {
             Log.e(LOG_TAG, " Trailers async task exception " + allEx);
         }
     }
 
 
-    // Awesome Movies Reviews
+    // Awesome Movies Reviews use Explicit Intent to ReviewsActivity
     private void handleReviews(View parent) {
         mReviewsLinkView = (TextView) parent.findViewById(R.id.readReviewsLink);
         mReviewsLinkView.setClickable(true);
@@ -304,43 +298,12 @@ public class DetailFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //Set on Bundle the Parcelable Movie object
-                //Use Explicit Intent to ReviewsActivity
                 Intent intent = new Intent(getActivity(), ReviewsActivity.class);
                 Bundle mParcel = new Bundle();
                 mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mMovie);
 
                 intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
                 startActivity(intent);
-
-
-                //Toast.makeText(getActivity(), "Got it!!", Toast.LENGTH_LONG).show();
-//                String[] result;
-//                FetchMovieExtras myfetch;
-//
-//                String[] reviewsParams = new String[2];
-//                reviewsParams[0] = mMovie.id;
-//                reviewsParams[1] = "reviews";
-//
-//                myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(reviewsParams);
-//
-//                try {
-//                    reviewApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
-//                    if (null != reviewApiResult && reviewApiResult.size() > 0) {
-//                        Log.v(LOG_TAG, " reviewApiResult length from async " + reviewApiResult.size());
-//
-//                            for (String s: reviewApiResult){
-//                                mReviewsAdapter.add(s);
-//                            }
-//
-//                    } else {
-//                        Log.v(LOG_TAG, " reviewApiResult is null still!");
-//                    }
-//
-//                } catch (Exception allEx) {
-//                    Log.e(LOG_TAG, " Reviews async task  exception " + allEx);
-//                }
-
-
             }
         });
     }
@@ -351,10 +314,9 @@ public class DetailFragment extends Fragment {
         final boolean isAdd;
         final boolean isRemove;
 
-        // Set up Mark-favorite Button - this action needs to Database action
+        // Set up Mark-favorite Button - these actions need to Database calls
         mFavoriteButtonView = (Button) parent.findViewById(R.id.mark_favorite);
         if (!needExtraFetch) {
-            //mFavoriteButtonView.setVisibility(View.INVISIBLE);
             mFavoriteButtonView.setText("Remove");
             mFavoriteButtonView.setBackgroundColor(Color.LTGRAY);
             isAdd = false;
@@ -374,28 +336,23 @@ public class DetailFragment extends Fragment {
         mFavoriteButtonView.setOnClickListener(new View.OnClickListener() {
 
             @Override
-            public void onClick (View v){
-                final Boolean inResult;
-                //FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), true, false);
+            public void onClick (View v) {
                 FavoriteMovieTask asyncAddTask = new FavoriteMovieTask(getActivity(), isAdd, isRemove);
-                try {
-                    inResult = asyncAddTask.execute(mMovie).get();
+                asyncAddTask.execute(mMovie);
 
-                    // Save the poster image to a File system to save space in the Database
-                    Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
-                } catch (Exception allEx){
-                    Log.e(LOG_TAG, allEx.toString());
-                } finally {
-                    Log.v(LOG_TAG, "finally Good so far?? ");
-                }
-
+                // Save the poster image to a File system to save space in the Database
+                Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
             }
         });
     }
 
-        /*
+    /*
         Poster image stored in a File: made public to use Detail Fragment View for the Favorite Detail as well.
+
+        * Save poster image to a file
      */
+    public final static String POSTER_FOLDER = "movieposters";
+
 
     public File getFileInInternalStorage(String titleAsName){
 
@@ -408,14 +365,6 @@ public class DetailFragment extends Fragment {
 
         return new File(folder + File.separator + titleAsName + ".jpg");
     }
-
-
-    /*
-    Save poster image to a file
- */
-    public final static String POSTER_FOLDER = "movieposters";
-    File file;
-
     private Target target = new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -460,12 +409,6 @@ public class DetailFragment extends Fragment {
         intent.putExtra(Intent.EXTRA_TEXT, shareString);
 
         return intent;
-    }
-
-    public void onSortOptionChanged(String newMovieId){
-        // For now just log it
-        Log.d(LOG_TAG, "newMovieId "+ newMovieId);
-        //((OnDetailRefreshListener)new MoviesFragment()).OnDetailRefresh(new DetailActivity());
     }
 
    /*

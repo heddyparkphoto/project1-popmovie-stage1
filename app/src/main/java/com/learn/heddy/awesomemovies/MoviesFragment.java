@@ -25,10 +25,8 @@ public class MoviesFragment extends Fragment {
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private ArrayAdapter<Movie> mMoviePosterAdapter;
-    private Movie mm;
+    private Movie mMovie;
     private static final String MOVIE_FRAG_PARCEL = "MOVIE_FRAG_PARCEL";
-//    private String mSortOption;
-//    private boolean isNewView = false;
 
     public MoviesFragment() {
 
@@ -37,7 +35,6 @@ public class MoviesFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.v(LOG_TAG, "onStart() called");
         updateAwesomeMovies();
     }
 
@@ -53,25 +50,15 @@ public class MoviesFragment extends Fragment {
 
         gridView.setAdapter(mMoviePosterAdapter);
 
-        Log.v(LOG_TAG, "onCreateView()");
-
         gridView.setOnItemClickListener(
                 new AdapterView.OnItemClickListener(){
 
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         //Movie mm = mMoviePosterAdapter.getItem(position);
-                        mm = mMoviePosterAdapter.getItem(position);
+                        mMovie = mMoviePosterAdapter.getItem(position);
 
-                        //Set on Bundle the Parcelable Movie object
-                        //Use Explicit Intent for Part 1 project
-//                        Intent intent = new Intent(getActivity(), DetailActivity.class);
-//                        Bundle mParcel = new Bundle();
-//                        mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
-//
-//                        intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
-//                        startActivity(intent);
-                        ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
+                        ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mMovie);
                     }
                 }
         );
@@ -101,13 +88,12 @@ public class MoviesFragment extends Fragment {
            }
         }
 
-        if (mm==null && defaultMovieArray!=null && defaultMovieArray.length>0){
-            Log.v(LOG_TAG, "updateAwesomeMovies...MOVIE DATA OBTAINED");
+        if (mMovie==null && defaultMovieArray!=null && defaultMovieArray.length>0){
             // user hasn't started yet, default to the first movie
-            mm = defaultMovieArray[0];
-            ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
+            mMovie = defaultMovieArray[0];
+            ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mMovie);
         } else {
-            Log.v(LOG_TAG, "mm not null or defaultMovieArray has nothing still....");
+            Log.v(LOG_TAG, "Problem during initializing the first movie item in Tablet UI.");
         }
     }
 
@@ -120,10 +106,6 @@ public class MoviesFragment extends Fragment {
         return (netInfo != null && netInfo.isConnectedOrConnecting());
     }
 
-//    public void setTwoPane(boolean twoPane) {
-//        this.twoPane = twoPane;
-//    }
-//
     /*
         Movie DetailFragment Callback for when an item has been selected.
      */
@@ -132,46 +114,19 @@ public class MoviesFragment extends Fragment {
         public void OnMainMovieItemClick(Movie movieItem);
     }
 
-
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        if (mDefaultMovie && mMoviePosterAdapter!=null && !mMoviePosterAdapter.isEmpty()){
-//            Log.v(LOG_TAG, "onResume -- setting default!");
-//            ((OnMainMovieItemSelectedListener)getActivity()).OnMainMovieItemClick(mMoviePosterAdapter.getItem(0));
-//        }
-//    }
-
-//    Log.v(LOG_TAG, "onCreateView()");
-//    Log.v(LOG_TAG, "onCreateView()");
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Log.v(LOG_TAG, "onActivityCreated()");
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Log.v(LOG_TAG, "onAttach()");
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mm!=null){
-            outState.putParcelable(MOVIE_FRAG_PARCEL, mm);
+        if (mMovie!=null){
+            outState.putParcelable(MOVIE_FRAG_PARCEL, mMovie);
         }
-        Log.v(LOG_TAG, "onSaveInstanceState")     ;
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState!=null){
-            mm = savedInstanceState.getParcelable(MOVIE_FRAG_PARCEL);
+            mMovie = savedInstanceState.getParcelable(MOVIE_FRAG_PARCEL);
         }
-        Log.v(LOG_TAG, "onViewStateRestored")     ;
     }
 }

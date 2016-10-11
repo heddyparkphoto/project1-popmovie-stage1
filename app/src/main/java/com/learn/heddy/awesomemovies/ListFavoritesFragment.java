@@ -53,7 +53,6 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
      */
     private static final int LOADER_ID_FAVORITES = 11;
     FavoriteMovieAdapter mAdapter;
-    Movie mm;
 
     public ListFavoritesFragment() {
     }
@@ -66,7 +65,6 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         getLoaderManager().initLoader(LOADER_ID_FAVORITES, null, this);
-        Log.d(LOG_TAG, "onActivityCreated");
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -79,7 +77,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
-        Log.d(LOG_TAG, "onCreateView");
+
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);// Populate the main screen with Favorite movies
 
         //Get the GridView from the fragment_main.xml so that the adapter can be set on it
@@ -97,8 +95,8 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
                         Cursor itemCursor = (Cursor) adapterView.getItemAtPosition(position);
                         if (null!=itemCursor) {
                             //itemCursor is that a Movie?  may need to Serialize into an Object
-                            //Movie mm = new Movie();
-                            mm = new Movie();
+                            Movie mm = new Movie();
+
                             mm.id = Integer.toString(itemCursor.getInt(COL_MOVIE_ID));
                             mm.posterpath = itemCursor.getString(COL_POSTER_FILE_PATH);
                             mm.title = itemCursor.getString(COL_TITLE);
@@ -106,52 +104,14 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
                             mm.rating = itemCursor.getString(COL_RATING);
                             mm.releasedate = itemCursor.getString(COL_RELEASEDATE);
 
-//                            Intent intent = new Intent(getActivity(), DetailActivity.class);
-//                            Bundle mParcel = new Bundle();
-//                            mParcel.putParcelable(DetailFragment.MOVIE_PARCEL, mm);
-//
-//                            intent.putExtra(DetailFragment.INTENT_PARCEL, mParcel);
-//                            startActivity(intent);
-
-                            /*
-                                TO-DO:  twoPane additions
-                             */
-                            //mPosition = position;
-
                             ((MoviesFragment.OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mm);
-                            //Log.d(LOG_TAG, "Clicked!");
                         }
                     }
                 }
         );
 
-
-/*   HANDLE code goes here....
-
-      if (savedInstanceState != null && savedInstanceState.containsKey(ARG_POSITION_KEY)){
-        mPosition = savedInstanceState.getInt(ARG_POSITION_KEY);
-        }
-*/
-        Log.d(LOG_TAG, "EXITing onCreateView");
-
         return rootView;
     }
-
-
-/*    more goes here ...
-
-@Override
-public void onSaveInstanceState(Bundle outState) {
-    if (mPosition != ListView.INVALID_POSITION) {
-        outState.putInt(ARG_POSITION_KEY, mPosition);
-    }
-    super.onSaveInstanceState(outState);
-}
-
-
-
-*/
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -168,8 +128,6 @@ public void onSaveInstanceState(Bundle outState) {
                 sortOrderParm
         );
 
-        Log.d(LOG_TAG, "returning CursorLoader c");
-
         return c;
     }
 
@@ -184,34 +142,4 @@ public void onSaveInstanceState(Bundle outState) {
         mAdapter.swapCursor(null);
     }
 
-    @Override
-    public void onPause() {
-        Log.d(LOG_TAG, "onPause");
-        super.onPause();
-        // Another activity is taking focus (this activity is about to be "paused").
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(LOG_TAG, "onStart");
-    }
-
-    @Override
-    public void onStop() {
-        Log.d(LOG_TAG, "onStop");
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        Log.d(LOG_TAG, "onDestroy");
-        super.onDestroy();
-    }
-
-    @Override
-    public void onResume() {
-        Log.d(LOG_TAG, "onResume");
-        super.onResume();
-    }
 }

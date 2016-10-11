@@ -17,15 +17,28 @@ import java.util.ArrayList;
 public class ReviewsActivity extends ActionBarActivity {
 
     static final String LOG_TAG = ReviewsActivity.class.getSimpleName();
+
     ArrayAdapter<String> mReviewsAdapter;
 
     static private ArrayList<String> reviewApiResult;     // reviews api result collection
     private Movie mMovie;
+    private static final String TITLE_STATE = "TITLE_STATE";
+    private static final String REVIEW_RESULT_STATE = "REVIEW_RESULT_STATE";
+
+    TextView mTitleView;
+    String mFullTitle;
+    ListView mReviewsList;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviews);
+
+        // find views
+        mTitleView = (TextView) findViewById(R.id.reviews_title);
+        mReviewsList = (ListView) findViewById(R.id.listview_reviews);
+        mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item); //layout not the view
+        mReviewsList.setAdapter(mReviewsAdapter);
 
         if (savedInstanceState == null) {
             Intent intent = getIntent();
@@ -38,16 +51,20 @@ public class ReviewsActivity extends ActionBarActivity {
             }
 
             if (mMovie!=null) {
-                // Show Movie Title
-                TextView titleView = (TextView) findViewById(R.id.reviews_title);
-                String moreTitle = titleView.getText() + "   " + mMovie.title;
-                titleView.setText(moreTitle);
+                // add the Movie Title to the Review title
+                mFullTitle = mTitleView.getText() + "   " + mMovie.title;
+                mTitleView.setText(mFullTitle);
 
-                // Set up for reviews list section
-                ListView reviewsList = (ListView) findViewById(R.id.listview_reviews);
-                mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item); //layout not the view
-                reviewsList.setAdapter(mReviewsAdapter);
                 handleReviewsView();
+            }
+        } else {
+            if (savedInstanceState.containsKey(TITLE_STATE) && mTitleView!=null){
+                mTitleView.setText(savedInstanceState.getString(TITLE_STATE));
+            }
+            if (savedInstanceState.getStringArrayList(REVIEW_RESULT_STATE)!=null){
+                for (String s: reviewApiResult){
+                    mReviewsAdapter.add(s);
+                }
             }
         }
     }
@@ -81,4 +98,19 @@ public class ReviewsActivity extends ActionBarActivity {
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(TITLE_STATE, mFullTitle);
+        outState.putStringArrayList(REVIEW_RESULT_STATE, reviewApiResult);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState!=null){
+            mFullTitle = savedInstanceState.getString(TITLE_STATE);
+            reviewApiResult = savedInstanceState.getStringArrayList(REVIEW_RESULT_STATE);
+        }
+    }
 }

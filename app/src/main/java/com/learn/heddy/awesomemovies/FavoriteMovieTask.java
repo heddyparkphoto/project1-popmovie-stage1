@@ -21,7 +21,6 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     private final Context mContext;
     private final boolean mIsAdd;
     private final boolean mIsDelete;
-    private Movie mMovie;
 
     public FavoriteMovieTask(Context context, boolean isAdd, boolean isDelete) {
 
@@ -35,40 +34,33 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     protected Boolean doInBackground(Movie... movies) {
         long newRowId = -1;
 
-        mMovie = movies[0];
+        Movie mm = movies[0];
 
         // Following codes executed if Adding the favorite movie
         if (mIsAdd) {
             //If the movie id already exists, do not insert - DB error can crash the app
-            Uri queryUri = MovieContract.MovieEntry.buildMovieUriWithId(Long.valueOf(mMovie.id));
+            Uri queryUri = MovieContract.MovieEntry.buildMovieUriWithId(Long.valueOf(mm.id));
             Cursor c = mContext.getContentResolver().query(queryUri, null, null, null, null);
             if (c.getCount() > 0) {
                 Log.d(LOG_TAG, "Exists in the Database.");
                 return true;
             } else {
 
-                //addToGoodMovieDatabase
+                //add to Movie Database
                 ContentValues values = new ContentValues();
 
-                values.put(MovieContract.MovieEntry.COLUMN_ID, mMovie.id);
-                values.put(MovieContract.MovieEntry.COLUMN_POSTERPATH, mMovie.posterpath);
-                values.put(MovieContract.MovieEntry.COLUMN_TITLE, mMovie.title);
-                values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, mMovie.overview);
-                values.put(MovieContract.MovieEntry.COLUMN_RATING, mMovie.rating);
-                values.put(MovieContract.MovieEntry.COLUMN_RELEASEDATE, mMovie.releasedate);
+                values.put(MovieContract.MovieEntry.COLUMN_ID, mm.id);
+                values.put(MovieContract.MovieEntry.COLUMN_POSTERPATH, mm.posterpath);
+                values.put(MovieContract.MovieEntry.COLUMN_TITLE, mm.title);
+                values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, mm.overview);
+                values.put(MovieContract.MovieEntry.COLUMN_RATING, mm.rating);
+                values.put(MovieContract.MovieEntry.COLUMN_RELEASEDATE, mm.releasedate);
 
                 Uri uri = mContext.getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, values);
                 newRowId = ContentUris.parseId(uri);
 
                 if (ContentUris.parseId(uri) != -1) {
                     Log.d(LOG_TAG, "uri inserted " + uri.toString());
-
-                /* target is inner class, Picasso fetches the poster image from online
-                   and saves into a target which is an image file of the internal storage
-                    - I did not try another storage, but after trying to use External storage that did not work
-                   it is an option that worked with my current very limited knowledge of the Android Emulator
-                */
-                    //Picasso.with(mContext).load(mMovie.posterpath).into(target);
                 } else {
                     Log.e(LOG_TAG, "ERROR INSERTING FAVORITES.");
                 }
@@ -84,7 +76,7 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
             deletedNum = mContext.getContentResolver().delete(
                     MovieContract.MovieEntry.CONTENT_URI,
                     sMovieByMovieIdSelection,
-                    new String[]{mMovie.id}
+                    new String[]{mm.id}
             );
 
             return deletedNum != 0;

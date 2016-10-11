@@ -3,7 +3,6 @@ package com.learn.heddy.awesomemovies;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 /**
  * Created by hyeryungpark on 9/16/16.
@@ -25,8 +24,7 @@ public class Utility {
     public static String formatTrailerString(String key, String name) {
 
         String retVal = key.concat(COMMA).concat(name);
-        Log.d("UTILITY", key + name + " returning " + retVal);
-        //return key.concat(COMMA).concat(name);
+
         return retVal;
     }
 

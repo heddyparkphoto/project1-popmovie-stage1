@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.learn.heddy.awesomemovies.data.MovieContract;
 
@@ -19,7 +18,6 @@ public class FavoriteDefaultMovieTask extends AsyncTask<Void, Void, Cursor> {
 
     public FavoriteDefaultMovieTask(Context context) {
 
-        Log.v(LOG_TAG, "Add task class constructor..");
         mContext = context;
     }
 
