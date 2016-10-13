@@ -22,23 +22,17 @@ import java.util.ArrayList;
 public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>> {
     private final String LOG_TAG = FetchMovieExtras.class.getSimpleName();
 
-    //public String[] trailersName = new String[0];
-    //public String[] reviewsName = new String[0];
     public String[] resultsArray;
     public ArrayList<String> returnList;
 
     @Override
     protected ArrayList<String> doInBackground(String... params) {
-        // These two need to be declared outside the try/catch
-        // so that they can be closed in the finally block.
+
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
 
         // Will contain the raw JSON response as a string.
         String extrasJsonStr = null;
-
-        //query holders
-        String[] firstResponsesArray = null; //will need further process in order to get posters
 
         try {
 
@@ -104,12 +98,9 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
             }
         }
 
-        //debug for now
-        Log.v(LOG_TAG, extrasJsonStr);
-
         //do Movie data parsing
         try {
-            getMovieExtrasFromJson(extrasJsonStr, params[1]); //either videos or reviews
+            getMovieExtrasFromJson(extrasJsonStr, params[1]); // params[1] is either videos or reviews
         } catch (JSONException e){
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
@@ -136,7 +127,7 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
                 if ((null != checksite && "youtube".equalsIgnoreCase(checksite))
                         && (null != checktype && checktype.toLowerCase().indexOf("trailer") >= 0))
                 {
-                    // we'll format a String with 2 fields for convenience - key to play the Video, and name to display in the UI
+                    // Format a String with 2 fields for convenience - key to play the Video, and user-friendly name to display in the UI
                     returnList.add(Utility.formatTrailerString(n.getString("key"), n.getString("name")));
                 }
             }
@@ -158,7 +149,7 @@ public class FetchMovieExtras extends AsyncTask<String, Void, ArrayList<String>>
                     fullcontent = "";
                 }
 
-                returnList.add(fullcontent + "\nAuthor: "+author); //further parse once I learn what to do with the database and files
+                returnList.add(fullcontent + "\nAuthor: "+author);
             }
         } else {
             Log.e(LOG_TAG, "Unknown request: only videos or reviews allowed.");

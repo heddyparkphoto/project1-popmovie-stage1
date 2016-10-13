@@ -37,7 +37,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
             MovieContract.MovieEntry.COLUMN_RELEASEDATE
     };
 
-    /* These indices are tied to PICKFAVORITE_COLUMNS.  If PICKFAVORITE_COLUMNS changes, these
+    /* These indices are tied to FAVORITE_COLUMNS.  If FAVORITE_COLUMNS changes, these
        must change.
     */
     public static final int COL_ID = 0;  //INTEGER
@@ -48,9 +48,6 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
     public static final int COL_RATING = 5; //REAL
     public static final int COL_RELEASEDATE = 6; //INTEGER
 
-    /* ****
-        Loader variables
-     */
     private static final int LOADER_ID_FAVORITES = 11;
     FavoriteMovieAdapter mAdapter;
 
@@ -94,7 +91,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
                         //CursorLoader returns the cursor on the position, null if it cannot seek to that position
                         Cursor itemCursor = (Cursor) adapterView.getItemAtPosition(position);
                         if (null!=itemCursor) {
-                            //itemCursor is that a Movie?  may need to Serialize into an Object
+                            //itemCursor is pointing to fields.  Build into a Movie object.
                             Movie mm = new Movie();
 
                             mm.id = Integer.toString(itemCursor.getInt(COL_MOVIE_ID));
@@ -133,7 +130,6 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(LOG_TAG, "in onLoadFinished");
         mAdapter.swapCursor(data);
     }
 

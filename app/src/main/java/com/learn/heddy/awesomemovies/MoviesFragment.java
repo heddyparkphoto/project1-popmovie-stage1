@@ -27,6 +27,7 @@ public class MoviesFragment extends Fragment {
     private ArrayAdapter<Movie> mMoviePosterAdapter;
     private Movie mMovie;
     private static final String MOVIE_FRAG_PARCEL = "MOVIE_FRAG_PARCEL";
+    private boolean isTwoPane;
 
     public MoviesFragment() {
 
@@ -55,7 +56,6 @@ public class MoviesFragment extends Fragment {
 
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        //Movie mm = mMoviePosterAdapter.getItem(position);
                         mMovie = mMoviePosterAdapter.getItem(position);
 
                         ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mMovie);
@@ -88,12 +88,12 @@ public class MoviesFragment extends Fragment {
            }
         }
 
-        if (mMovie==null && defaultMovieArray!=null && defaultMovieArray.length>0){
-            // user hasn't started yet, default to the first movie
-            mMovie = defaultMovieArray[0];
-            ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mMovie);
-        } else {
-            Log.v(LOG_TAG, "Problem during initializing the first movie item in Tablet UI.");
+        if (isTwoPane) {
+            if (mMovie == null && defaultMovieArray != null && defaultMovieArray.length > 0) {
+                // user hasn't started yet, default to the first movie
+                mMovie = defaultMovieArray[0];
+                ((OnMainMovieItemSelectedListener) getActivity()).OnMainMovieItemClick(mMovie);
+            }
         }
     }
 
@@ -104,6 +104,10 @@ public class MoviesFragment extends Fragment {
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
         return (netInfo != null && netInfo.isConnectedOrConnecting());
+    }
+
+    public void setTwoPane(boolean twoPane) {
+        isTwoPane = twoPane;
     }
 
     /*

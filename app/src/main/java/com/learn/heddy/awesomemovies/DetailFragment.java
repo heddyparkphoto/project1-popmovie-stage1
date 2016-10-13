@@ -34,7 +34,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import static com.learn.heddy.awesomemovies.ListFavoritesFragment.*;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_MOVIE_ID;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_OVERVIEW;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_POSTER_FILE_PATH;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_RATING;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_RELEASEDATE;
+import static com.learn.heddy.awesomemovies.ListFavoritesFragment.COL_TITLE;
 
 /**
  * Created by hyeryungpark on 9/15/16.
@@ -56,17 +61,17 @@ public class DetailFragment extends Fragment {
     private Button mFavoriteButtonView;
     private TextView mTrailerTitleView;
 
-    //Trailers ArrayAdapter
-    ArrayAdapter<String> mTrailersAdapter; //trailers are another JSONARRAY, so for now, test with a string -just concat couple fields as String
-
     // Flag to make extra api calls for trailers and reviews
     private boolean needExtraFetch;
-    // Set up some Constants for the extra api calls
-    static final String YOUTUBE_URL_BEGIN = "https://www.youtube.com/watch";
-    static final String YOUTUBE_V_FIELD = "v";
+
+    private boolean isTwoPane;
+
+    // Trailers ArrayAdapter
+    ArrayAdapter<String> mTrailersAdapter; // User-friendly names of trailers from the videos api
 
     ArrayList<String> mTrailerKeyArrayList;
-    static private ArrayList<String> trailerApiResult;    // trailers api result collection
+    static private ArrayList<String> trailerApiResult;
+    private static final String PLAY = ">>  ";  // Simple characters that mimic Play icon.
 
     private final String LOG_TAG = DetailFragment.class.getSimpleName();
 
@@ -90,12 +95,11 @@ public class DetailFragment extends Fragment {
                     .getActionProvider(shareItem);
 
             if (mShareActionProvider != null) {
-                // New condition during CursorLoader.Callbacks implmentation - Cursor can also set this text
                 if (mShareActionTrailerUri != null) {
                     mShareActionProvider.setShareIntent(createMoviesShareIntent());
                 } else {
                     // Warn that the Share Action Provider was null
-                    Log.d(LOG_TAG, "Share Action Provider was null....");
+                    Log.w(LOG_TAG, "Share Action Provider was null....");
                 }
             }
         }
@@ -105,7 +109,7 @@ public class DetailFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        // finish Views
+        // get Views
         mPosterImageView = (ImageView) rootView.findViewById(R.id.posterImage);
         mTitleView = (TextView) rootView.findViewById(R.id.titleText);
         mSynopsisPlotView = (TextView) rootView.findViewById(R.id.synopsisPlotText);
@@ -120,30 +124,25 @@ public class DetailFragment extends Fragment {
             Bundle bundle = intent.getBundleExtra(INTENT_PARCEL);
             if (bundle.getParcelable(MOVIE_PARCEL) != null) {
                 mMovie = bundle.getParcelable(MOVIE_PARCEL);
-                Log.d(LOG_TAG, "Intent MOVIE_PARCEL not null!");
-            } else {
-                Log.d(LOG_TAG, "Bad::::: MOVIE_PARCEL is NULL!");
             }
         } else if (getArguments()!= null){
             Bundle args = getArguments();
             if (args != null){
                 mMovie = args.getParcelable(DetailFragment.MOVIE_PARCEL);
-                Log.d(LOG_TAG, "getArguments mMovie not null!");
-            } else {
-                Log.d(LOG_TAG, "Bad::getArguments --- mMovie is NULL!");
             }
         }
 
         if (null == mMovie) {
-            Log.d(LOG_TAG, "Movie was null on Intent.  Nothing to parse.");  // Should I do more here??
-            // Are we in the first screen of Favorites option?
+
+            // If it is the first time after the Favorites Collection is Selected, mMovie is still null.
+            // When that happens, load the DetailFragment with the Favorites database with the highest rating among them.
             String sort_option = Utility.getPreferredSortOption(getActivity());
             if (getString(R.string.favorites).compareTo(sort_option)==0) {
                 try {
-                    // InitialLoad load with the Favorites database with the highest rating among them
+
                     FavoriteDefaultMovieTask asyncTask = new FavoriteDefaultMovieTask(getActivity());
                     Cursor data = asyncTask.execute().get();
-                    Log.d(LOG_TAG, "fetch executed....");
+
                     mMovie = new Movie();
                     mMovie.id = Integer.toString(data.getInt(COL_MOVIE_ID));
                     mMovie.posterpath = data.getString(COL_POSTER_FILE_PATH);
@@ -152,17 +151,14 @@ public class DetailFragment extends Fragment {
                     mMovie.rating = data.getString(COL_RATING);
                     mMovie.releasedate = data.getString(COL_RELEASEDATE);
 
-                    // Save the poster image to a File system to save space in the Database
+                    // Poster image is loaded from a File system
                     Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
-                    // ((OnDetailRefreshListener)getActivity()).OnDetailRefresh(new DetailActivity());
                 } catch (Exception allEx) {
-                    // Failed retrieving the data
                     Log.e(LOG_TAG, allEx.toString());
                 }
             }
         } else if (savedInstanceState!=null){
             if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
-                Log.d(LOG_TAG, "MOVIE_PARCEL on the savedInstanceState");
                 mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
             }
         }
@@ -170,7 +166,7 @@ public class DetailFragment extends Fragment {
         if (mMovie!=null) {
             // Set up for trailers list section
             ListView trailersList = (ListView) rootView.findViewById(R.id.listview_trailer);
-            mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item); //layout not the view
+            mTrailersAdapter = new ArrayAdapter<String>(getActivity(), R.layout.trailer_item);
             trailersList.setAdapter(mTrailersAdapter);
 
             trailersList.setOnItemClickListener(
@@ -182,9 +178,13 @@ public class DetailFragment extends Fragment {
 
                                 urlAsString = mTrailerKeyArrayList.get(position);
 
-                                Uri uri = Uri.parse(YOUTUBE_URL_BEGIN).buildUpon()
-                                        .appendQueryParameter(YOUTUBE_V_FIELD, urlAsString)
-                                        .build();
+                                Uri.Builder builder = new Uri.Builder();
+                                builder.scheme("https")
+                                        .authority("www.youtube.com")
+                                        .appendPath("watch")
+                                        .appendQueryParameter("v", urlAsString);
+
+                                Uri uri = builder.build();
                                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                                 if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
                                     startActivity(intent);
@@ -203,9 +203,9 @@ public class DetailFragment extends Fragment {
             String posterpath = mMovie.posterpath;
 
             /* load Poster image;
-             there are 2 ways of getting the poster depending on the Preference settings
-             If needExtraFetch, poster's coming in from real-time online,
-             if not, poster's coming from file saved in memory using movie title as file name.
+               there are 2 ways of getting the poster depending on the Preference settings
+               If needExtraFetch, poster's coming in from real-time online,
+               if not, poster's coming from file saved in memory using movie title as file name.
             */
             if (needExtraFetch) {
                 Picasso.with(getActivity()).load(posterpath).into(mPosterImageView);
@@ -214,11 +214,11 @@ public class DetailFragment extends Fragment {
                 if (posterfile != null) {
                     Picasso.with(getActivity()).load(posterfile).into(mPosterImageView);
                 } else {
-                    Log.e(LOG_TAG, "Image for poster not found.");
+                    Log.e(LOG_TAG, "Poster file for movie poster not found.");
                 }
             }
 
-            // Populate more Details
+            // Populate the rest of the view
             mTitleView.setText(mMovie.title);
             mSynopsisPlotView.setText(mMovie.overview);
             mReleaseDateView.setText(mMovie.releasedate);
@@ -248,7 +248,6 @@ public class DetailFragment extends Fragment {
     // Awesome Movies Trailers
     private void handleTrailers(View parent) {
 
-        String[] result;
         FetchMovieExtras myfetch;
 
         //trailers Async
@@ -259,7 +258,7 @@ public class DetailFragment extends Fragment {
         myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(videoParams);
 
         try {
-            trailerApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
+            trailerApiResult = myfetch.get(); // Extract return values here before they disappear.
             if (null != trailerApiResult) {
                 int tSize = trailerApiResult.size();
 
@@ -268,10 +267,12 @@ public class DetailFragment extends Fragment {
                 String delim = Utility.getTrailerDelimeter();
                 int delimPos = 0;
 
+                // mTrailerKeyArrayList holds the YouTube URIs
+                // mTrailersAdapter holds user-friendly Trailer names.
                 for (String s : trailerApiResult) {
                     delimPos = s.indexOf(delim);
                     mTrailerKeyArrayList.add(s.substring(0, delimPos));
-                    mTrailersAdapter.add(s.substring(delimPos + 1));
+                    mTrailersAdapter.add(PLAY+s.substring(delimPos + 1));
                 }
 
                 if (mTrailerKeyArrayList != null && mTrailerKeyArrayList.size() > 0) {
@@ -282,7 +283,7 @@ public class DetailFragment extends Fragment {
                     }
                 }
             } else {
-                Log.v(LOG_TAG, " trailerApiResult is null!");
+                // trailerApiResult is null.
             }
         } catch (Exception allEx) {
             Log.e(LOG_TAG, " Trailers async task exception " + allEx);
@@ -290,7 +291,7 @@ public class DetailFragment extends Fragment {
     }
 
 
-    // Awesome Movies Reviews use Explicit Intent to ReviewsActivity
+    // Reviews use Explicit Intent to ReviewsActivity
     private void handleReviews(View parent) {
         mReviewsLinkView = (TextView) parent.findViewById(R.id.readReviewsLink);
         mReviewsLinkView.setClickable(true);
@@ -314,10 +315,10 @@ public class DetailFragment extends Fragment {
         final boolean isAdd;
         final boolean isRemove;
 
-        // Set up Mark-favorite Button - these actions need to Database calls
+        // Set up Mark-favorite Button - these actions need Database calls
         mFavoriteButtonView = (Button) parent.findViewById(R.id.mark_favorite);
         if (!needExtraFetch) {
-            mFavoriteButtonView.setText("Remove");
+            mFavoriteButtonView.setText(getString(R.string.markRemove));
             mFavoriteButtonView.setBackgroundColor(Color.LTGRAY);
             isAdd = false;
             isRemove = true;
@@ -343,8 +344,8 @@ public class DetailFragment extends Fragment {
                 // Save the poster image to a File system to save space in the Database
                 Picasso.with(getActivity()).load(mMovie.posterpath).into(target);
 
-                // Update the Detail fragment when removed from the Favorites collection
-                if (isRemove){
+                // Callback to Update the Tablet UI where removed movie does not show up.
+               if (isRemove && isTwoPane){
                     ((RemovedNotificationListener)getActivity()).OnRemovedItem();
                 }
             }
@@ -352,24 +353,25 @@ public class DetailFragment extends Fragment {
     }
 
     /*
-        Poster image stored in a File: made public to use Detail Fragment View for the Favorite Detail as well.
-
-        * Save poster image to a file
+        Poster image stored in a File
      */
     public final static String POSTER_FOLDER = "movieposters";
-
 
     public File getFileInInternalStorage(String titleAsName){
 
         File folder = getContext().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
 
         if (!folder.exists()){
-            Log.e(LOG_TAG, "Error folder not found.");
+            Log.e(LOG_TAG, "Error movieposters folder not found.");
             return null;
         }
 
         return new File(folder + File.separator + titleAsName + ".jpg");
     }
+
+    /*
+        Used Picasso tutorial example to save the poster image to a file.
+     */
     private Target target = new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -416,45 +418,33 @@ public class DetailFragment extends Fragment {
         return intent;
     }
 
+    public void setTwoPane(boolean twoPane) {
+        isTwoPane = twoPane;
+    }
+
     /*
-        When in Two-pane mode, remove the Removed collection and update with the Default movie in Favorites collection
+        Remove notification callback
      */
     public interface RemovedNotificationListener {
         public void OnRemovedItem();
     }
 
-   /*
-            NOT HAVING TO SAVE THE mMovie for the Non-Favorite paths
-            MovieFragment is saving the mm so that it does not overlay when rotated.
-     */
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        //if (!needExtraFetch) {
-            if (mMovie != null) {
-                Log.v(LOG_TAG, "onSaveInstanceState");
-                outState.putParcelable(MOVIE_PARCEL, mMovie);
-            }
-     //   }
-
+        if (mMovie != null) {
+            outState.putParcelable(MOVIE_PARCEL, mMovie);
+        }
     }
 
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-       // if (!needExtraFetch) {
-            if (savedInstanceState != null) {
-                if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
-                    Log.v(LOG_TAG, "onViewStateRestored");
-                    mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
-                }
-        //    }
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getParcelable(MOVIE_PARCEL) != null) {
+                mMovie = savedInstanceState.getParcelable(MOVIE_PARCEL);
+            }
         }
-        Log.v(LOG_TAG, "onViewStateRestored");
-
     }
-
-
 }

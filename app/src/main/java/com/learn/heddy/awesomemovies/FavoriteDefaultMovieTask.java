@@ -9,6 +9,9 @@ import com.learn.heddy.awesomemovies.data.MovieContract;
 
 /**
  * Created by hyeryungpark on 10/10/16.
+ *
+ * This class fetches Favorites in the background thread.
+ *
  */
 public class FavoriteDefaultMovieTask extends AsyncTask<Void, Void, Cursor> {
 

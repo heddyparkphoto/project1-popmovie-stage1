@@ -19,7 +19,8 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="5dp"
-            android:paddingBottom="30dp">
+            android:paddingBottom="30dp"
+            android:focusableInTouchMode="true">
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

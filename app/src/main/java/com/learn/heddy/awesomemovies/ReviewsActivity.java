@@ -20,7 +20,7 @@ public class ReviewsActivity extends ActionBarActivity {
 
     ArrayAdapter<String> mReviewsAdapter;
 
-    static private ArrayList<String> reviewApiResult;     // reviews api result collection
+    static private ArrayList<String> reviewApiResult;   // reviews api result collection
     private Movie mMovie;
     private static final String TITLE_STATE = "TITLE_STATE";
     private static final String REVIEW_RESULT_STATE = "REVIEW_RESULT_STATE";
@@ -37,7 +37,7 @@ public class ReviewsActivity extends ActionBarActivity {
         // find views
         mTitleView = (TextView) findViewById(R.id.reviews_title);
         mReviewsList = (ListView) findViewById(R.id.listview_reviews);
-        mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item); //layout not the view
+        mReviewsAdapter = new ArrayAdapter<String>(this, R.layout.review_item);
         mReviewsList.setAdapter(mReviewsAdapter);
 
         if (savedInstanceState == null) {
@@ -81,21 +81,17 @@ public class ReviewsActivity extends ActionBarActivity {
         myfetch = (FetchMovieExtras) new FetchMovieExtras().execute(reviewsParams);
 
         try {
-            reviewApiResult = myfetch.get(); // trailerName was good here with the get(), but disappears soon, so extract data here!!
+            reviewApiResult = myfetch.get(); // Extract the result before it disappears.
             if (null != reviewApiResult && reviewApiResult.size() > 0) {
-                Log.v(LOG_TAG, " reviewApiResult length from async " + reviewApiResult.size());
-
                 for (String s: reviewApiResult){
                     mReviewsAdapter.add(s);
                 }
             } else {
-                Log.v(LOG_TAG, " reviewApiResult is null still!");
+                // reviewApiResult is null!
             }
-
         } catch (Exception allEx) {
             Log.e(LOG_TAG, " Reviews async task  exception " + allEx);
         }
-
     }
 
     @Override

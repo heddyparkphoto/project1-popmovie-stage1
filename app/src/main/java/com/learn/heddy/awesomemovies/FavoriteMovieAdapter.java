@@ -48,8 +48,6 @@ public class FavoriteMovieAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        // Use the selection columns defined in the ListFavoritesFragment
-        //ListFavoritesFragment.PICKFAVORITE_COLUMNS
 
         FavoriteViewHolder holder = (FavoriteViewHolder)view.getTag();
 
@@ -58,14 +56,13 @@ public class FavoriteMovieAdapter extends CursorAdapter {
         if (posterfile != null) {
             Picasso.with(context).load(posterfile).into(holder.imageView);
         } else {
-            Log.e(LOG_TAG, "Image for poster not found.");
+            Log.e(LOG_TAG, "File for poster image not found.");
         }
     }
 
     /*
-        Poster image stored in a File: made public to use Detail Fragment View for the Favorite Detail as well.
+        Poster image stored in a File: DetailFragment when viewing a Favorite Movie and this Adapter must use the same folder.
      */
-
     public File getFileInInternalStorage(String titleAsName){
 
         File folder = mContext.getDir(DetailFragment.POSTER_FOLDER, Context.MODE_PRIVATE);

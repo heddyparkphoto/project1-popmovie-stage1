@@ -23,8 +23,6 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
     private final boolean mIsDelete;
 
     public FavoriteMovieTask(Context context, boolean isAdd, boolean isDelete) {
-
-        Log.v(LOG_TAG, "Add task class constructor..");
         mContext = context;
         mIsAdd = isAdd;
         mIsDelete = isDelete;
@@ -60,9 +58,9 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
                 newRowId = ContentUris.parseId(uri);
 
                 if (ContentUris.parseId(uri) != -1) {
-                    Log.d(LOG_TAG, "uri inserted " + uri.toString());
+                    // success
                 } else {
-                    Log.e(LOG_TAG, "ERROR INSERTING FAVORITES.");
+                    Log.e(LOG_TAG, "Error Inserting to Movie database.");
                 }
             }
 
@@ -89,6 +87,7 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean success) {
+        // Display a helpful Toast message
         if (success){
             if (mIsAdd) {
                 Toast.makeText(mContext, "Added to Favorite Movie Collection!", Toast.LENGTH_SHORT).show();
@@ -96,7 +95,7 @@ public class FavoriteMovieTask extends AsyncTask<Movie, Void, Boolean> {
                 Toast.makeText(mContext, "Removed from the Favorite Movies!", Toast.LENGTH_SHORT).show();
             }
         } else {
-            Toast.makeText(mContext, "FavoriteMovieTask failed.", Toast.LENGTH_LONG).show();
+            Toast.makeText(mContext, "Sorry, could not process Favorites Collection.", Toast.LENGTH_LONG).show();
         }
     }
 }

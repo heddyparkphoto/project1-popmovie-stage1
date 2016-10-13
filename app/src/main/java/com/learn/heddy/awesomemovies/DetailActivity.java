@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 
 /**
  * Created by hyeryungpark on 8/27/16.
@@ -20,15 +19,14 @@ public class DetailActivity extends ActionBarActivity {
         if (savedInstanceState == null) {
             Movie mm = null;
 
-            // in order to de-couple from either MainActivity or Main Fragment, use bundle arguments
+            // in order to de-couple from either MainActivity or MovieFragment/ListFavoritesFragment, use bundle arguments
             Intent intent = getIntent();
             if (null != intent && null != intent.getBundleExtra(DetailFragment.INTENT_PARCEL)) {
                 Bundle bundle = intent.getBundleExtra(DetailFragment.INTENT_PARCEL);
                 if (bundle.getParcelable(DetailFragment.MOVIE_PARCEL) != null) {
                     mm = bundle.getParcelable(DetailFragment.MOVIE_PARCEL);
                 } else {
-                    // message?
-                    Log.v(LOG_TAG, "in else...");
+                    // Nothing to show
                 }
             }
 
