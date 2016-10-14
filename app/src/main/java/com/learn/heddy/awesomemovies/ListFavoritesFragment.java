@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -112,7 +111,7 @@ public class ListFavoritesFragment extends Fragment implements LoaderManager.Loa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //query right away
+
         Uri pickUri = MovieContract.MovieEntry.CONTENT_URI;
         String sortOrderParm = MovieContract.MovieEntry.COLUMN_RATING + " DESC ";
 

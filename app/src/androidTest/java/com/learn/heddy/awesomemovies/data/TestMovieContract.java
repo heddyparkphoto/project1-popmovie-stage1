@@ -11,11 +11,8 @@ public class TestMovieContract  extends AndroidTestCase {
 
     private static final long TEST_AUTO_ID = 425L;
     private static final String TEST_MOVIE_ID = "3940055000";
-    private static final String TEST_MOVIE_CONTENT_URL_STRING = "content://com.learn.heddy.pickgoodmovie/movie";
-    /*
-        private static final String MOVIE_CONTENT_URI = "content://com.learn.heddy.pickgoodmovie/movie";
-        private static final String MOVIE_CONTENT_ITEM_TYPE = "vnd.android.cursor.item/com.learn.heddy.pickgoodmovie/movie";
-    */
+    private static final String TEST_MOVIE_CONTENT_URL_STRING = "content://com.learn.heddy.awesomemovies/movie";
+
     public void testBuildMovieUriWithId() {
         Uri testUri = MovieContract.MovieEntry.buildMovieUriWithId(TEST_AUTO_ID);
 

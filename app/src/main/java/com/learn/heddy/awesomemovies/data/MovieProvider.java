@@ -168,10 +168,9 @@ public class MovieProvider  extends ContentProvider {
         }
 
         if (deletedRowNum != 0 ){
-            Log.d(LOG_TAG, "Delete test success!");
             getContext().getContentResolver().notifyChange(uri, null);
         } else {
-            Log.d(LOG_TAG, "Delete TEST FAILED.");
+            Log.e(LOG_TAG, "Delete FAILED.");
         }
         return deletedRowNum;
     }

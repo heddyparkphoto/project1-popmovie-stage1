@@ -134,8 +134,8 @@ public class DetailFragment extends Fragment {
 
         if (null == mMovie) {
 
-            // If it is the first time after the Favorites Collection is Selected, mMovie is still null.
-            // When that happens, load the DetailFragment with the Favorites database with the highest rating among them.
+            // If it is the first time after the Favorites Collection is Selected in Tablet UI, mMovie is still null.
+            // When that happens, show the first movie returned from the Favorites database with the highest rating order.
             String sort_option = Utility.getPreferredSortOption(getActivity());
             if (getString(R.string.favorites).compareTo(sort_option)==0) {
                 try {
@@ -359,7 +359,7 @@ public class DetailFragment extends Fragment {
 
     public File getFileInInternalStorage(String titleAsName){
 
-        File folder = getContext().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
+        File folder = getActivity().getDir(POSTER_FOLDER, Context.MODE_PRIVATE);
 
         if (!folder.exists()){
             Log.e(LOG_TAG, "Error movieposters folder not found.");

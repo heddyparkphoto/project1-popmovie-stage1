@@ -4,15 +4,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends ActionBarActivity implements MoviesFragment.OnMainMovieItemSelectedListener,
                                                                 DetailFragment.RemovedNotificationListener
 {
-
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final String DETAILFRAGMENT_TAG = "DETAILFRAGMENT";
     private static final String MOVIEFRAGMENT_TAG = "MOVIEFRAGMENT";
     private static final String FAVORITESFRAGMENT_TAG = "FAVORITESFRAGMENT";
@@ -82,7 +79,6 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 
     @Override
     protected void onResume() {
-        Log.d(LOG_TAG, "onResume");
         super.onResume();
 
         String sort_option = Utility.getPreferredSortOption(this);
@@ -119,6 +115,29 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.detailcontainer, df, DETAILFRAGMENT_TAG)
                             .commit();
+                }
+            }
+        } else {
+             /*
+                Reset mTwoPane flag even if the mSortOption has not changed on the DetailFragment
+             */
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (df == null) {
+                df = new DetailFragment();
+
+                if (mTwoPane) {
+                    df.setTwoPane(true);
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.detailcontainer, df, DETAILFRAGMENT_TAG)
+                            .commit();
+                } else {
+                    df.setTwoPane(false);
+                }
+            } else {
+                if (mTwoPane) {
+                    df.setTwoPane(true);
+                } else {
+                    df.setTwoPane(false);
                 }
             }
         }
@@ -177,7 +196,7 @@ public class MainActivity extends ActionBarActivity implements MoviesFragment.On
 
         }
 
-        // Check if we are showing the ListFavoriteFragment, and if so, replace with a brand new one
+        // Check if we are showing the ListFavoriteFragment, and if so, replace with a brand new one with the removed movie gone.
         ListFavoritesFragment fragment = (ListFavoritesFragment) getSupportFragmentManager().findFragmentByTag(FAVORITESFRAGMENT_TAG);
         if (null!=fragment) {
             if (mSortOption.compareTo(getString(R.string.favorites)) == 0) {

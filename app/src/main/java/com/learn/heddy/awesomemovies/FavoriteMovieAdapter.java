@@ -19,9 +19,11 @@ import java.io.File;
 public class FavoriteMovieAdapter extends CursorAdapter {
 
     private static final String LOG_TAG = FavoriteMovieAdapter.class.getSimpleName();
+    private Context mContext;
 
     public FavoriteMovieAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
+        mContext = context;
     }
 
     public static class FavoriteViewHolder {
